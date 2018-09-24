@@ -1,0 +1,25 @@
+# The purpose of this service is to launch terasense API server on startup
+# To install copy it to /etc/systemd/system/ folder and execute the following commands
+#  systemctl enable tsapi-server
+#  systemctl start  tsapi-server
+
+[Unit]
+Description=TeraSense API server
+Documentation=https://github.com/olegv142/tsapi
+After=network.target
+
+[Service]
+Type=idle
+ExecStart=/usr/bin/daemon -D /root -- /usr/bin/tsapi-server -d /usr/share/bone101/ -x /bone101/
+
+Restart=always
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=tsapi-server
+User=root
+Group=root
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
+
