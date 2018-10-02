@@ -10,9 +10,9 @@
 //-----------------------------------------------------------------------------
 #pragma NOIV               // Do not generate interrupt vectors
 
-#include "..\inc\fx2.h"
-#include "..\inc\fx2regs.h"
-#include "..\inc\syncdly.h"            // SYNCDELAY macro
+#include "fx2.h"
+#include "fx2regs.h"
+#include "syncdly.h"            // SYNCDELAY macro
 
 extern BOOL GotSUD;             // Received setup data flag
 extern BOOL Sleep;
@@ -63,15 +63,16 @@ void TD_Init(void)             // Called once at startup
 
   // we are just using the default values, yes this is not necessary...
   EP1OUTCFG = 0xA0;
-  EP1INCFG = 0xA0;
-  SYNCDELAY;                    // see TRM section 15.14
+  SYNCDELAY;           // see TRM section 15.14
+  EP1INCFG = 0xB0;     // Configure EP1IN as BULK IN EP
+  SYNCDELAY;
   EP2CFG = 0xA2;
   SYNCDELAY;                    
-  EP4CFG = 0xA0;
+  EP4CFG = 0x7F;       // Invalid EP
   SYNCDELAY;                    
   EP6CFG = 0xE2;
   SYNCDELAY;                    
-  EP8CFG = 0xE0;
+  EP8CFG = 0x7F;       // Invalid EP
 
   // out endpoints do not come up armed
   
@@ -80,25 +81,22 @@ void TD_Init(void)             // Called once at startup
   EP2BCL = 0x80;                // arm EP2OUT by writing byte count w/skip.
   SYNCDELAY;                    
   EP2BCL = 0x80;
-  SYNCDELAY;                    
-  EP4BCL = 0x80;                // arm EP4OUT by writing byte count w/skip.
-  SYNCDELAY;                    
-  EP4BCL = 0x80;    
+
+  Rwuen = TRUE;                 // Enable remote-wakeup
 
   // enable dual autopointer feature
   AUTOPTRSETUP |= 0x01;
 
 }
 
-
 void TD_Poll(void)              // Called repeatedly while the device is idle
 {
   WORD i;
   WORD count;
 
-  if(!(EP2468STAT & bmEP2EMPTY))
+  if (!(EP2468STAT & bmEP2EMPTY))
   { // check EP2 EMPTY(busy) bit in EP2468STAT (SFR), core set's this bit when FIFO is empty
-     if(!(EP2468STAT & bmEP6FULL))
+     if (!(EP2468STAT & bmEP6FULL))
      {  // check EP6 FULL(busy) bit in EP2468STAT (SFR), core set's this bit when FIFO is full
         APTR1H = MSB( &EP2FIFOBUF );
         APTR1L = LSB( &EP2FIFOBUF );
@@ -122,30 +120,20 @@ void TD_Poll(void)              // Called repeatedly while the device is idle
      }
   }
 
-  if(!(EP2468STAT & bmEP4EMPTY))
-  { // check EP4 EMPTY(busy) bit in EP2468STAT (SFR), core set's this bit when FIFO is empty
-     if(!(EP2468STAT & bmEP8FULL))
-     {  // check EP8 FULL(busy) bit in EP2468STAT (SFR), core set's this bit when FIFO is full
-        APTR1H = MSB( &EP4FIFOBUF );
-        APTR1L = LSB( &EP4FIFOBUF );
-
-        AUTOPTRH2 = MSB( &EP8FIFOBUF );
-        AUTOPTRL2 = LSB( &EP8FIFOBUF );
-
-        count = (EP4BCH << 8) + EP4BCL;
-
-        // loop EP4OUT buffer data to EP8IN
-        for( i = 0x0000; i < count; i++ )
-        {
-           // setup to transfer EP4OUT buffer to EP8IN buffer using AUTOPOINTER(s)
-           EXTAUTODAT2 = EXTAUTODAT1;
-        }
-        EP8BCH = EP4BCH;  
-        SYNCDELAY;  
-        EP8BCL = EP4BCL;        // arm EP8IN
-        SYNCDELAY;                    
-        EP4BCL = 0x80;          // re(arm) EP4OUT
-     }
+  // Serial State Notification that has to be sent periodically to the host
+  if (!(EP1INCS & 0x02))      // check if EP1IN is available
+  {
+    EP1INBUF[0] = 0x0A;       // if it is available, then fill the first 10 bytes of the buffer with 
+    EP1INBUF[1] = 0x20;       // appropriate data. 
+    EP1INBUF[2] = 0x00;
+    EP1INBUF[3] = 0x00;
+    EP1INBUF[4] = 0x00;
+    EP1INBUF[5] = 0x00;
+    EP1INBUF[6] = 0x00;
+    EP1INBUF[7] = 0x02;
+    EP1INBUF[8] = 0x00;
+    EP1INBUF[9] = 0x00;
+    EP1INBC = 10;            // manually commit once the buffer is filled
   }
 }
 

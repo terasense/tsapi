@@ -10,9 +10,9 @@
 //-----------------------------------------------------------------------------
 // Copyright (c) 2011, Cypress Semiconductor Corporation All rights reserved
 //-----------------------------------------------------------------------------
-#include "..\inc\fx2.h"
-#include "..\inc\fx2regs.h"
-#include "..\inc\syncdly.h"            // SYNCDELAY macro
+#include "fx2.h"
+#include "fx2regs.h"
+#include "syncdly.h"            // SYNCDELAY macro
 
 //-----------------------------------------------------------------------------
 // Constants
@@ -150,13 +150,7 @@ void main(void)
    EA = 1;                  // Enable 8051 interrupts
 
 #ifndef NO_RENUM
-   // Renumerate if necessary.  Do this by checking the renum bit.  If it
-   // is already set, there is no need to renumerate.  The renum bit will
-   // already be set if this firmware was loaded from an eeprom.
-   if(!(USBCS & bmRENUM))
-   {
-       EZUSB_Discon(TRUE);   // renumerate
-   }
+   EZUSB_Discon(TRUE);   // renumerate
 #endif
 
    // unconditionally re-connect.  If we loaded from eeprom we are
@@ -230,32 +224,14 @@ BYTE xdata LineCode[7] = {0x60,0x09,0x00,0x00,0x00,0x00,0x08};
 
 static void CDC_SetLineEncoding(void)
 {
-   int i, Len;
-   Len = 7;
-   EUSB = 0 ;
-   SUDPTRCTL = 0x01;
    EP0BCL = 0x00;
-   SUDPTRCTL = 0x00;
-   EUSB = 1;
-   while (EP0BCL != Len);
-   SYNCDELAY;
-   for (i = 0; i < Len; i++)
-      LineCode[i] = EP0BUF[i];
 }
 
 static void CDC_GetLineCoding(void)
 {
-   int i, Len;
    SUDPTRCTL = 0x01;
-   Len = 7;
-   for (i = 0; i < Len; i++)
-      EP0BUF[i] = LineCode[i];
-   EP0BCH = 0x00;
-   SYNCDELAY;
-   EP0BCL = Len;
-   SYNCDELAY;
-   while (EP0CS & 0x02);
-   SUDPTRCTL = 0x00;
+   SUDPTRH = MSB(LineCode);
+   SUDPTRL = LSB(LineCode);
 }
 
 // Device request parser
@@ -277,6 +253,7 @@ void SetupCommand(void)
          break;
 
       case SC_GET_DESCRIPTOR:                  // *** Get Descriptor
+         SUDPTRCTL = 0x01;
          if(DR_GetDescriptor())
             switch(SETUPDAT[3])         
             {
