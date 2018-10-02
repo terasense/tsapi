@@ -267,11 +267,11 @@ void SetupCommand(void)
    {
       case SET_LINE_CODING:
          CDC_SetLineEncoding();
-      break;
+         break;
 
       case GET_LINE_CODING:
          CDC_GetLineCoding();
-      break;
+         break;
 
       case SET_CONTROL_STATE:
          break;
