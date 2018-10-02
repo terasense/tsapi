@@ -75,7 +75,7 @@ void TD_Init(void)             // Called once at startup
 
   // out endpoints do not come up armed
   
-  // since the defaults are double buffered we must write dummy byte counts twice
+  // since the defaults are double buffered we must write dummy byte counts (setting SKIP bit) twice
   SYNCDELAY;                    
   EP2BCL = 0x80;                // arm EP2OUT by writing byte count w/skip.
   SYNCDELAY;                    

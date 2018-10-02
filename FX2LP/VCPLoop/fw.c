@@ -219,7 +219,44 @@ BOOL HighSpeedCapable()
       return FALSE;
    else
       return TRUE;
-}   
+}
+
+#define SET_LINE_CODING (0x20)
+#define GET_LINE_CODING (0x21)
+#define SET_CONTROL_STATE (0x22)
+
+// 2400 baud, no parity, 1 stop bit
+BYTE xdata LineCode[7] = {0x60,0x09,0x00,0x00,0x00,0x00,0x08};
+
+static void CDC_SetLineEncoding(void)
+{
+   int i, Len;
+   Len = 7;
+   EUSB = 0 ;
+   SUDPTRCTL = 0x01;
+   EP0BCL = 0x00;
+   SUDPTRCTL = 0x00;
+   EUSB = 1;
+   while (EP0BCL != Len);
+   SYNCDELAY;
+   for (i = 0; i < Len; i++)
+      LineCode[i] = EP0BUF[i];
+}
+
+static void CDC_GetLineCoding(void)
+{
+   int i, Len;
+   SUDPTRCTL = 0x01;
+   Len = 7;
+   for (i = 0; i < Len; i++)
+      EP0BUF[i] = LineCode[i];
+   EP0BCH = 0x00;
+   SYNCDELAY;
+   EP0BCL = Len;
+   SYNCDELAY;
+   while (EP0CS & 0x02);
+   SUDPTRCTL = 0x00;
+}
 
 // Device request parser
 void SetupCommand(void)
@@ -228,6 +265,17 @@ void SetupCommand(void)
 
    switch(SETUPDAT[1])
    {
+      case SET_LINE_CODING:
+         CDC_SetLineEncoding();
+      break;
+
+      case GET_LINE_CODING:
+         CDC_GetLineCoding();
+      break;
+
+      case SET_CONTROL_STATE:
+         break;
+
       case SC_GET_DESCRIPTOR:                  // *** Get Descriptor
          if(DR_GetDescriptor())
             switch(SETUPDAT[3])         
