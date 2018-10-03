@@ -69,7 +69,7 @@ Options 1,0,0  // Target 'Target 1'
  C51MSC ()
  C51DEF ()
  C51UDF ()
- INCC5 ()
+ INCC5 (../inc)
  AX51FL=4
  AX51MSC ()
  AX51SET ()
@@ -114,5 +114,29 @@ Options 1,0,0  // Target 'Target 1'
  FLASH1 { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
  FLASH2 ()
  FLASH3 ("" ())
+EndOpt
+
+Options 1,1,0  // Group 'Source Group 1'
+ PropFld { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+ IncBld=2
+ AlwaysBuild=2
+ GenAsm=2
+ AsmAsm=2
+ PublicsOnly=2
+ StopCode=11
+ CustArgs ()
+ LibMods ()
+ BankNo=65535
+ C51FL=177119914
+ C51VA=0
+ C51MSC ()
+ C51DEF ()
+ C51UDF ()
+ INCC5 (../)
+ AX51FL=170
+ AX51MSC ()
+ AX51SET ()
+ AX51RST ()
+ INCA5 ()
 EndOpt
 
