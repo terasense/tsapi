@@ -18,12 +18,21 @@ extern BOOL GotSUD;             // Received setup data flag
 extern BOOL Sleep;
 extern BOOL Rwuen;
 extern BOOL Selfpwr;
+extern BOOL Reenum;
 
 BYTE Configuration;             // Current configuration
 BYTE AlternateSetting;          // Alternate settings
 
 #define VR_NAKALL_ON    0xD0
 #define VR_NAKALL_OFF   0xD1
+
+void timer_init(void);
+void timer_alarm_reset(WORD val);
+
+void timer_alarm(void)
+{
+   Reenum = TRUE;
+}
 
 //-----------------------------------------------------------------------------
 // Task Dispatcher hooks
@@ -87,6 +96,8 @@ void TD_Init(void)             // Called once at startup
   // enable dual autopointer feature
   AUTOPTRSETUP |= 0x01;
 
+  // Enable 100Hz timer
+  timer_init();
 }
 
 void TD_Poll(void)              // Called repeatedly while the device is idle
@@ -249,6 +260,10 @@ void ISR_Sof(void) interrupt 0
 {
    EZUSB_IRQ_CLEAR();
    USBIRQ = bmSOF;            // Clear SOF IRQ
+
+   if (FNADDR != 0) {
+      timer_alarm_reset(2);
+   }
 }
 
 void ISR_Ures(void) interrupt 0

@@ -34,6 +34,7 @@ volatile BOOL   GotSUD;
 BOOL      Rwuen;
 BOOL      Selfpwr;
 volatile BOOL   Sleep;                  // Sleep mode enable flag
+volatile BOOL   Reenum;                 // Re-enumeration request
 
 WORD   pDeviceDscr;   // Pointer to Device Descriptor; Descriptors may be moved
 WORD   pDeviceQualDscr;
@@ -90,8 +91,9 @@ void main(void)
    // Initialize Global States
    Sleep = FALSE;               // Disable sleep mode
    Rwuen = FALSE;               // Disable remote wakeup
-   Selfpwr = FALSE;            // Disable self powered
-   GotSUD = FALSE;               // Clear "Got setup data" flag
+   Selfpwr = FALSE;             // Disable self powered
+   Reenum  = FALSE;             // Re-enumeration request
+   GotSUD = FALSE;              // Clear "Got setup data" flag
 
    // Initialize user device
    TD_Init();
@@ -108,7 +110,7 @@ void main(void)
 
    INTSETUP |= (bmAV2EN | bmAV4EN);     // Enable INT 2 & 4 autovectoring
 
-   USBIE |= bmSUDAV | bmSUTOK | bmSUSP | bmURES | bmHSGRANT;   // Enable selected interrupts
+   USBIE |= bmSOF | bmSUDAV | bmSUTOK | bmSUSP | bmURES | bmHSGRANT;   // Enable selected interrupts
    EA = 1;                  // Enable 8051 interrupts
 
 #ifndef NO_RENUM
@@ -128,6 +130,12 @@ void main(void)
    // Task Dispatcher
    while(TRUE)               // Main Loop
    {
+      // Reenumerate if necessary
+      if (Reenum) {
+         Reenum = FALSE;
+         EZUSB_Discon(TRUE);
+      }
+
       // Poll User Device
       TD_Poll();
 
