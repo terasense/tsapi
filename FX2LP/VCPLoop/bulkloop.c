@@ -27,7 +27,7 @@ BYTE AlternateSetting;          // Alternate settings
 #define VR_NAKALL_OFF   0xD1
 
 void timer_init(void);
-void timer_alarm_reset(WORD val);
+void timer_alarm_update(WORD val);
 
 void timer_alarm(void)
 {
@@ -262,7 +262,7 @@ void ISR_Sof(void) interrupt 0
    USBIRQ = bmSOF;            // Clear SOF IRQ
 
    if (FNADDR != 0) {
-      timer_alarm_reset(2);
+      timer_alarm_update(10);
    }
 }
 

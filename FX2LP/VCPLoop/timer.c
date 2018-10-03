@@ -3,16 +3,17 @@
 
 // 10ms interrupt
 #define TIMER0_COUNT 0x63C0  // 48,000,000 Hz / (12 * 100)
-#define TIMER0_ALARM_INI 500 // 5 sec
+#define TIMER0_ALARM_INI 1000 // 10 sec
 
 volatile WORD timer_alarm_cnt;
 
 void timer_alarm(void);
 
-void timer_alarm_reset(WORD val)
+void timer_alarm_update(WORD val)
 {
    EA = 0; // disables all interrupts
-   timer_alarm_cnt = val;
+   if (timer_alarm_cnt < val)
+      timer_alarm_cnt = val;
    EA = 1; // enables all interrupts
 }
 

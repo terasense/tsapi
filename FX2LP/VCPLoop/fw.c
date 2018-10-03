@@ -63,6 +63,8 @@ BOOL DR_ClearFeature(void);
 BOOL DR_SetFeature(void);
 BOOL DR_VendorCmnd(void);
 
+void timer_alarm_update(WORD val);
+
 // this table is used by the epcs macro 
 const char code  EPCS_Offset_Lookup_Table[] =
 {
@@ -131,9 +133,12 @@ void main(void)
    while(TRUE)               // Main Loop
    {
       // Reenumerate if necessary
-      if (Reenum) {
-         Reenum = FALSE;
+      if (Reenum)
+      {
+         EP0CS &= ~bmEPSTALL;
          EZUSB_Discon(TRUE);
+         timer_alarm_update(1000);
+         Reenum = FALSE;
       }
 
       // Poll User Device
@@ -183,6 +188,12 @@ BOOL HighSpeedCapable()
       return FALSE;
    else
       return TRUE;
+}
+
+void StallEP0(void)
+{
+   EZUSB_STALL_EP0();
+   Reenum = TRUE;
 }
 
 #define SET_LINE_CODING (0x20)
@@ -241,7 +252,7 @@ void SetupCommand(void)
 				  }
 				  else
 				  {
-					  EZUSB_STALL_EP0();
+					  StallEP0();
 				  }
 				  break;
                case GD_CONFIGURATION:         // Configuration
@@ -259,10 +270,10 @@ void SetupCommand(void)
                      SUDPTRL = LSB(dscr_ptr);
                   }
                   else 
-                     EZUSB_STALL_EP0();   // Stall End Point 0
+                     StallEP0();   // Stall End Point 0
                   break;
                default:            // Invalid request
-                  EZUSB_STALL_EP0();      // Stall End Point 0
+                  StallEP0();      // Stall End Point 0
             }
          break;
       case SC_GET_INTERFACE:                  // *** Get Interface
@@ -300,7 +311,7 @@ void SetupCommand(void)
                   EP0BCL = 2;
                   break;
                default:            // Invalid Command
-                  EZUSB_STALL_EP0();      // Stall End Point 0
+                  StallEP0();      // Stall End Point 0
             }
          break;
       case SC_CLEAR_FEATURE:                  // *** Clear Feature
@@ -311,7 +322,7 @@ void SetupCommand(void)
                   if(SETUPDAT[2] == 1)
                      Rwuen = FALSE;       // Disable Remote Wakeup
                   else
-                     EZUSB_STALL_EP0();   // Stall End Point 0
+                     StallEP0();   // Stall End Point 0
                   break;
                case FT_ENDPOINT:         // End Point
                   if(SETUPDAT[2] == 0)
@@ -320,7 +331,7 @@ void SetupCommand(void)
                      EZUSB_RESET_DATA_TOGGLE( SETUPDAT[4] );
                   }
                   else
-                     EZUSB_STALL_EP0();   // Stall End Point 0
+                     StallEP0();   // Stall End Point 0
                   break;
             }
          break;
@@ -339,18 +350,18 @@ void SetupCommand(void)
                      // from the host before it will enter test mode.
                      break;
                   else
-                     EZUSB_STALL_EP0();   // Stall End Point 0
+                     StallEP0();   // Stall End Point 0
                   break;
                case FT_ENDPOINT:         // End Point
                   *(BYTE xdata *) epcs(SETUPDAT[4]) |= bmEPSTALL;
                   break;
                default:
-                  EZUSB_STALL_EP0();      // Stall End Point 0
+                  StallEP0();      // Stall End Point 0
             }
          break;
       default:                     // *** Invalid Command
          if(DR_VendorCmnd())
-            EZUSB_STALL_EP0();            // Stall End Point 0
+            StallEP0();            // Stall End Point 0
    }
 
    // Acknowledge handshake phase of device request
