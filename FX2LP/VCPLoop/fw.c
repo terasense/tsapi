@@ -87,13 +87,6 @@ const char code  EPCS_Offset_Lookup_Table[] =
 // Task dispatcher
 void main(void)
 {
-   DWORD   i;
-   WORD   offset;
-   DWORD   DevDescrLen;
-   DWORD   j=0;
-   WORD   IntDescrAddr;
-   WORD   ExtDescrAddr;
-
    // Initialize Global States
    Sleep = FALSE;               // Disable sleep mode
    Rwuen = FALSE;               // Disable remote wakeup
@@ -103,43 +96,12 @@ void main(void)
    // Initialize user device
    TD_Init();
 
-   // The following section of code is used to relocate the descriptor table. 
-   // The frameworks uses SUDPTRH and SUDPTRL to automate the SETUP requests
-   // for descriptors.  These registers only work with memory locations
-   // in the EZ-USB internal RAM.  Therefore, if the descriptors are located
-   // in external RAM, they must be copied to in internal RAM.  
-   // The descriptor table is relocated by the frameworks ONLY if it is found 
-   // to be located in external memory.
+   // Initialize descriptor pointers
    pDeviceDscr = (WORD)&DeviceDscr;
    pDeviceQualDscr = (WORD)&DeviceQualDscr;
    pHighSpeedConfigDscr = (WORD)&HighSpeedConfigDscr;
    pFullSpeedConfigDscr = (WORD)&FullSpeedConfigDscr;
    pStringDscr = (WORD)&StringDscr;
-
-   // Is the descriptor table in external RAM (> 16Kbytes)?  If yes,
-   // then relocate.
-   // Note that this code only checks if the descriptors START in 
-   // external RAM.  It will not work if the descriptor table spans
-   // internal and external RAM.
-   if ((WORD)&DeviceDscr & 0xC000)
-   {
-      // first, relocate the descriptors
-      IntDescrAddr = INTERNAL_DSCR_ADDR;
-      ExtDescrAddr = (WORD)&DeviceDscr;
-      DevDescrLen = (WORD)&UserDscr - (WORD)&DeviceDscr + 2;
-      for (i = 0; i < DevDescrLen; i++)
-         *((BYTE xdata *)IntDescrAddr+i) = *((BYTE xdata *)ExtDescrAddr+i);
-
-      // update all of the descriptor pointers
-      pDeviceDscr = IntDescrAddr;
-      offset = (WORD)&DeviceDscr - INTERNAL_DSCR_ADDR;
-      pDeviceQualDscr -= offset;
-      pConfigDscr -= offset;
-      pOtherConfigDscr -= offset;
-      pHighSpeedConfigDscr -= offset;
-      pFullSpeedConfigDscr -= offset;
-      pStringDscr -= offset;
-   }
 
    EZUSB_IRQ_ENABLE();            // Enable USB interrupt (INT2)
    EZUSB_ENABLE_RSMIRQ();            // Wake-up interrupt
