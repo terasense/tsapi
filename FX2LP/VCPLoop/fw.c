@@ -243,18 +243,18 @@ void SetupCommand(void)
                   SUDPTRL = LSB(pDeviceDscr);
                   break;
                case GD_DEVICE_QUALIFIER:            // Device Qualifier
-			   	  // only retuen a device qualifier if this is a high speed
-				  // capable chip.
-			   	  if (HighSpeedCapable())
-				  {
-	                  SUDPTRH = MSB(pDeviceQualDscr);
-	                  SUDPTRL = LSB(pDeviceQualDscr);
-				  }
-				  else
-				  {
-					  StallEP0();
-				  }
-				  break;
+                  // only retuen a device qualifier if this is a high speed
+                  // capable chip.
+                  if (HighSpeedCapable())
+                  {
+                     SUDPTRH = MSB(pDeviceQualDscr);
+                     SUDPTRL = LSB(pDeviceQualDscr);
+                  }
+                  else
+                  {
+                     StallEP0();
+                  }
+                  break;
                case GD_CONFIGURATION:         // Configuration
                   SUDPTRH = MSB(pConfigDscr);
                   SUDPTRL = LSB(pConfigDscr);

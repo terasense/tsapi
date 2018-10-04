@@ -27,17 +27,17 @@ void timer_alarm_update(WORD alarm_ticks)
 // "using 1" tells the compiler to use register bank 1
 void timer0 (void) interrupt 1 using 1
 {
-	// Stop Timer 0, adjust the Timer 0 counter so that we get another
-	// in 10ms, and restart the timer.
-	TR0 = 0; // stop timer
-	TL0 = TL0 + (TIMER0_COUNT & 0x00FF);
-	TH0 = TH0 + (TIMER0_COUNT >> 8);
+   // Stop Timer 0, adjust the Timer 0 counter so that we get another
+   // in 10ms, and restart the timer.
+   TR0 = 0; // stop timer
+   TL0 = TL0 + (TIMER0_COUNT & 0x00FF);
+   TH0 = TH0 + (TIMER0_COUNT >> 8);
 
    if (!--timer_alarm_cnt) {
       timer_alarm_cnt = timer_alarm();
    }
 
-	TR0 = 1; // start Timer 0
+   TR0 = 1; // start Timer 0
 }
 
 // Initializes alarm timer generating ticks every 10 msec.
@@ -45,19 +45,19 @@ void timer0 (void) interrupt 1 using 1
 // be updated by timer_alarm_update.
 void timer_init(WORD alarm_ticks)
 {
-	EA = 0; // disables all interrupts
+   EA = 0; // disables all interrupts
 
-	TR0 = 0; // stops Timer 0
-	CKCON = 0x03; // Timer 0 using CLKOUT/12
-	TMOD &= ~0x0F; // clear Timer 0 mode bits
-	TMOD |= 0x01; // setup Timer 0 as a 16-bit timer
-	TL0 = (TIMER0_COUNT & 0x00FF); // loads the timer counts
-	TH0 = (TIMER0_COUNT >> 8);
-	PT0 = 0; // sets the Timer 0 interrupt to low priority
-	ET0 = 1; // enables Timer 0 interrupt
-	TR0 = 1; // starts Timer 0
+   TR0 = 0; // stops Timer 0
+   CKCON = 0x03; // Timer 0 using CLKOUT/12
+   TMOD &= ~0x0F; // clear Timer 0 mode bits
+   TMOD |= 0x01; // setup Timer 0 as a 16-bit timer
+   TL0 = (TIMER0_COUNT & 0x00FF); // loads the timer counts
+   TH0 = (TIMER0_COUNT >> 8);
+   PT0 = 0; // sets the Timer 0 interrupt to low priority
+   ET0 = 1; // enables Timer 0 interrupt
+   TR0 = 1; // starts Timer 0
 
    timer_alarm_cnt = alarm_ticks;
 
-	EA = 1; // enables all interrupts
+   EA = 1; // enables all interrupts
 }
