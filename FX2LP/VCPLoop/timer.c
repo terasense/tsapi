@@ -3,17 +3,19 @@
 
 // 10ms interrupt
 #define TIMER0_COUNT 0x63C0  // 48,000,000 Hz / (12 * 100)
-#define TIMER0_ALARM_INI 1000 // 10 sec
 
+// Alarm counter decremented every 10 msec
 volatile WORD timer_alarm_cnt;
 
-void timer_alarm(void);
+// Alarm callback fired when alarm tick counter reach zero. Returns new counter value.
+WORD timer_alarm(void);
 
-void timer_alarm_update(WORD val)
+// Make sure the alarm won't fire sooner than the given number of ticks
+void timer_alarm_update(WORD alarm_ticks)
 {
    EA = 0; // disables all interrupts
-   if (timer_alarm_cnt < val)
-      timer_alarm_cnt = val;
+   if (timer_alarm_cnt < alarm_ticks)
+      timer_alarm_cnt = alarm_ticks;
    EA = 1; // enables all interrupts
 }
 
@@ -32,17 +34,17 @@ void timer0 (void) interrupt 1 using 1
 	TH0 = TH0 + (TIMER0_COUNT >> 8);
 
    if (!--timer_alarm_cnt) {
-      timer_alarm_cnt = TIMER0_ALARM_INI;
-      timer_alarm();
+      timer_alarm_cnt = timer_alarm();
    }
 
 	TR0 = 1; // start Timer 0
 }
 
-// This function enables Timer 0. Timer 0 generates a synchronous interrupt
-// once every 100Hz or 10 ms.
-void timer_init(void)
-{	
+// Initializes alarm timer generating ticks every 10 msec.
+// After alarm_ticks the timer_alarm will be called unless the alarm time
+// be updated by timer_alarm_update.
+void timer_init(WORD alarm_ticks)
+{
 	EA = 0; // disables all interrupts
 
 	TR0 = 0; // stops Timer 0
@@ -55,7 +57,7 @@ void timer_init(void)
 	ET0 = 1; // enables Timer 0 interrupt
 	TR0 = 1; // starts Timer 0
 
-   timer_alarm_cnt = TIMER0_ALARM_INI;
+   timer_alarm_cnt = alarm_ticks;
 
 	EA = 1; // enables all interrupts
 }

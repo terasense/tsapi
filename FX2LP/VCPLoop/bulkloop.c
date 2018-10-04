@@ -26,12 +26,19 @@ BYTE AlternateSetting;          // Alternate settings
 #define VR_NAKALL_ON    0xD0
 #define VR_NAKALL_OFF   0xD1
 
-void timer_init(void);
-void timer_alarm_update(WORD val);
+// Initializes alarm timer generating ticks every 10 msec.
+// After alarm_ticks the timer_alarm will be called unless the alarm time
+// be updated by timer_alarm_update.
+void timer_init(WORD alarm_ticks);
 
-void timer_alarm(void)
+// Make sure the alarm won't fire sooner than the given number of ticks
+void timer_alarm_update(WORD alarm_ticks);
+
+// Alarm callback fired when alarm tick counter reach zero. Returns new counter value.
+WORD timer_alarm(void)
 {
    Reenum = TRUE;
+   return 1000; // 10 sec
 }
 
 //-----------------------------------------------------------------------------
@@ -97,7 +104,7 @@ void TD_Init(void)             // Called once at startup
   AUTOPTRSETUP |= 0x01;
 
   // Enable 100Hz timer
-  timer_init();
+  timer_init(1000); // 10 sec to alarm
 }
 
 void TD_Poll(void)              // Called repeatedly while the device is idle

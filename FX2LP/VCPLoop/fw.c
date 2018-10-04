@@ -63,7 +63,8 @@ BOOL DR_ClearFeature(void);
 BOOL DR_SetFeature(void);
 BOOL DR_VendorCmnd(void);
 
-void timer_alarm_update(WORD val);
+// Make sure the alarm won't fire sooner than the given number of ticks
+void timer_alarm_update(WORD alarm_ticks);
 
 // this table is used by the epcs macro 
 const char code  EPCS_Offset_Lookup_Table[] =
@@ -136,6 +137,7 @@ void main(void)
       if (Reenum)
       {
          EZUSB_Discon(TRUE);
+         // Give the host 10 sec to enumerate
          timer_alarm_update(1000);
          Reenum = FALSE;
       }
