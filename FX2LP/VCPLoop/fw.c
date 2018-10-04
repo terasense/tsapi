@@ -135,7 +135,6 @@ void main(void)
       // Reenumerate if necessary
       if (Reenum)
       {
-         EP0CS &= ~bmEPSTALL;
          EZUSB_Discon(TRUE);
          timer_alarm_update(1000);
          Reenum = FALSE;
@@ -192,7 +191,6 @@ BOOL HighSpeedCapable()
 
 void StallEP0(void)
 {
-   EZUSB_STALL_EP0();
    Reenum = TRUE;
 }
 
