@@ -22,6 +22,10 @@ extern BOOL Reenum;
 
 BYTE Configuration;             // Current configuration
 BYTE AlternateSetting;          // Alternate settings
+BYTE HighSpeed;
+BYTE NeedZlp;
+
+#define MAX_PACKET (HighSpeed ? 512 : 64)
 
 #define VR_NAKALL_ON    0xD0
 #define VR_NAKALL_OFF   0xD1
@@ -105,6 +109,9 @@ void TD_Init(void)             // Called once at startup
 
   // Enable 100Hz timer
   timer_init(1000); // 10 sec to alarm
+
+  HighSpeed = FALSE;
+  NeedZlp   = FALSE;
 }
 
 void TD_Poll(void)              // Called repeatedly while the device is idle
@@ -135,6 +142,17 @@ void TD_Poll(void)              // Called repeatedly while the device is idle
         EP6BCL = EP2BCL;        // arm EP6IN
         SYNCDELAY;                    
         EP2BCL = 0x80;          // re(arm) EP2OUT
+        NeedZlp = (count == MAX_PACKET);
+     }
+  }
+
+  if (EP2468STAT & bmEP6EMPTY)
+  {
+     if (NeedZlp) {
+        NeedZlp = FALSE;
+        // Send zero length packet to flush host buffer
+        EP6BCH = 0;
+        EP6BCL = 0;
      }
   }
 
@@ -275,6 +293,8 @@ void ISR_Sof(void) interrupt 0
 
 void ISR_Ures(void) interrupt 0
 {
+   HighSpeed = FALSE;
+
    // whenever we get a USB reset, we should revert to full speed mode
    pConfigDscr = pFullSpeedConfigDscr;
    ((CONFIGDSCR xdata *) pConfigDscr)->type = CONFIG_DSCR;
@@ -296,6 +316,8 @@ void ISR_Highspeed(void) interrupt 0
 {
    if (EZUSB_HIGHSPEED())
    {
+      HighSpeed = TRUE;
+
       pConfigDscr = pHighSpeedConfigDscr;
       ((CONFIGDSCR xdata *) pConfigDscr)->type = CONFIG_DSCR;
       pOtherConfigDscr = pFullSpeedConfigDscr;
