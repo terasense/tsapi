@@ -21,11 +21,6 @@ static BYTE AlternateSetting;          // Alternate settings
 static BYTE HighSpeed;
 static BYTE NeedZlp;
 
-#define MAX_PACKET (HighSpeed ? 512 : 64)
-
-#define VR_NAKALL_ON    0xD0
-#define VR_NAKALL_OFF   0xD1
-
 // Alarm callback fired when alarm tick counter reach zero. Returns new counter value.
 WORD timer_alarm(void)
 {
