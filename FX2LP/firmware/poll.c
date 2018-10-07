@@ -15,6 +15,7 @@
 #include "syncdly.h"            // SYNCDELAY macro
 #include "timer.h"
 #include "main.h"
+#include "poll.h"
 
 static BYTE Configuration;             // Current configuration
 static BYTE AlternateSetting;          // Alternate settings

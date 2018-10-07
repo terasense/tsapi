@@ -16,6 +16,7 @@
 #include "syncdly.h"            // SYNCDELAY macro
 #include "timer.h"
 #include "main.h"
+#include "poll.h"
 
 //-----------------------------------------------------------------------------
 // Global Variables
@@ -38,21 +39,6 @@ WORD   pStringDscr;
 // Prototypes
 //-----------------------------------------------------------------------------
 static void SetupCommand(void);
-
-void TD_Init(void);
-void TD_Poll(void);
-BOOL TD_Suspend(void);
-BOOL TD_Resume(void);
-
-BOOL DR_GetDescriptor(void);
-BOOL DR_SetConfiguration(void);
-BOOL DR_GetConfiguration(void);
-BOOL DR_SetInterface(void);
-BOOL DR_GetInterface(void);
-BOOL DR_GetStatus(void);
-BOOL DR_ClearFeature(void);
-BOOL DR_SetFeature(void);
-BOOL DR_VendorCmnd(void);
 
 // this table is used by the epcs macro 
 const char code  EPCS_Offset_Lookup_Table[] =
