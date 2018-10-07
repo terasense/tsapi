@@ -13,6 +13,7 @@
 #include "fx2.h"
 #include "fx2regs.h"
 #include "syncdly.h"            // SYNCDELAY macro
+#include "timer.h"
 
 //-----------------------------------------------------------------------------
 // Constants
@@ -62,9 +63,6 @@ BOOL DR_GetStatus(void);
 BOOL DR_ClearFeature(void);
 BOOL DR_SetFeature(void);
 BOOL DR_VendorCmnd(void);
-
-// Make sure the alarm won't fire sooner than the given number of ticks
-void timer_alarm_update(WORD alarm_ticks);
 
 // this table is used by the epcs macro 
 const char code  EPCS_Offset_Lookup_Table[] =
