@@ -10,23 +10,11 @@
 //-----------------------------------------------------------------------------
 // Copyright (c) 2011, Cypress Semiconductor Corporation All rights reserved
 //-----------------------------------------------------------------------------
+
 #include "fx2.h"
 #include "fx2regs.h"
 #include "syncdly.h"            // SYNCDELAY macro
 #include "timer.h"
-
-//-----------------------------------------------------------------------------
-// Constants
-//-----------------------------------------------------------------------------
-#define DELAY_COUNT   0x9248*8L  // Delay for 8 sec at 24Mhz, 4 sec at 48
-#define _IFREQ  48000            // IFCLK constant for Synchronization Delay
-#define _CFREQ  48000            // CLKOUT constant for Synchronization Delay
-
-//-----------------------------------------------------------------------------
-// Random Macros
-//-----------------------------------------------------------------------------
-#define   min(a,b) (((a)<(b))?(a):(b))
-#define   max(a,b) (((a)>(b))?(a):(b))
 
 //-----------------------------------------------------------------------------
 // Global Variables
@@ -172,9 +160,8 @@ void main(void)
             // 8051 activity will resume here due to USB bus or Wakeup# pin activity.
             EZUSB_Resume();   // If source is the Wakeup# pin, signal the host to Resume.      
             TD_Resume();
-         }   
+         }
       }
-
    }
 }
 
