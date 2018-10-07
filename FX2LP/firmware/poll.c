@@ -14,17 +14,12 @@
 #include "fx2regs.h"
 #include "syncdly.h"            // SYNCDELAY macro
 #include "timer.h"
+#include "main.h"
 
-extern BOOL GotSUD;             // Received setup data flag
-extern BOOL Sleep;
-extern BOOL Rwuen;
-extern BOOL Selfpwr;
-extern BOOL Reenum;
-
-BYTE Configuration;             // Current configuration
-BYTE AlternateSetting;          // Alternate settings
-BYTE HighSpeed;
-BYTE NeedZlp;
+static BYTE Configuration;             // Current configuration
+static BYTE AlternateSetting;          // Alternate settings
+static BYTE HighSpeed;
+static BYTE NeedZlp;
 
 #define MAX_PACKET (HighSpeed ? 512 : 64)
 

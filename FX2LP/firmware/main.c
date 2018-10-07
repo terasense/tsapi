@@ -32,23 +32,24 @@
 // Global Variables
 //-----------------------------------------------------------------------------
 volatile BOOL   GotSUD;
-BOOL      Rwuen;
-BOOL      Selfpwr;
 volatile BOOL   Sleep;                  // Sleep mode enable flag
 volatile BOOL   Reenum;                 // Re-enumeration request
+BOOL            Rwuen;
+BOOL            Selfpwr;
 
 WORD   pDeviceDscr;   // Pointer to Device Descriptor; Descriptors may be moved
 WORD   pDeviceQualDscr;
 WORD   pHighSpeedConfigDscr;
-WORD   pFullSpeedConfigDscr;   
+WORD   pFullSpeedConfigDscr;
 WORD   pConfigDscr;
-WORD   pOtherConfigDscr;   
-WORD   pStringDscr;   
+WORD   pOtherConfigDscr;
+WORD   pStringDscr;
 
 //-----------------------------------------------------------------------------
 // Prototypes
 //-----------------------------------------------------------------------------
-void SetupCommand(void);
+static void SetupCommand(void);
+
 void TD_Init(void);
 void TD_Poll(void);
 BOOL TD_Suspend(void);
