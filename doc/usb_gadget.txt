@@ -1,3 +1,0 @@
-/var/local/bb_usb_mass_storage.img
-/opt/scripts/boot/am335x_evm.sh
-
