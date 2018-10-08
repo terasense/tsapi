@@ -208,6 +208,14 @@ Bit position Description
 */
          break;
 
+      case SEND_LINE_BREAK:
+/*
+The wValue field contains the length of time, in milliseconds, of the break signal.
+If wValue contains a value of FFFFh, then the device will send a break until another
+SendBreak request is received with the wValue of 0000h.
+*/
+         break;
+
       case SC_GET_DESCRIPTOR:                  // *** Get Descriptor
          SUDPTRCTL = 0x01;
          if(DR_GetDescriptor())

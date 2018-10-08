@@ -22,9 +22,10 @@ extern WORD   pStringDscr;
 #define VR_NAKALL_ON    0xD0
 #define VR_NAKALL_OFF   0xD1
 
-#define SET_LINE_CODING (0x20)
-#define GET_LINE_CODING (0x21)
+#define SET_LINE_CODING   (0x20)
+#define GET_LINE_CODING   (0x21)
 #define SET_CONTROL_STATE (0x22)
+#define SEND_LINE_BREAK   (0x23)
 
 /*
 Line coding structure:
