@@ -39,52 +39,52 @@ DSCR   SEGMENT   CODE PAGE
       rseg DSCR      ;; locate the descriptor table in on-part memory.
 
 DeviceDscr:   
-      db   DSCR_DEVICE_LEN      ;; Descriptor length
-      db   DSCR_DEVICE   ;; Decriptor type
-      dw   0002H      ;; Specification Version (BCD)
-      db   02H        ;; Device class
-      db   00H         ;; Device sub-class
-      db   00H         ;; Device sub-sub-class
-      db   64         ;; Maximum packet size
-      dw   0B404H      ;; Vendor ID
-      dw   1747H      ;; Product ID
-      dw   0000H      ;; Product version ID
-      db   1         ;; Manufacturer string index
-      db   2         ;; Product string index
-      db   0         ;; Serial number string index
-      db   1         ;; Number of configurations
+      db   DSCR_DEVICE_LEN ;; Descriptor length
+      db   DSCR_DEVICE     ;; Decriptor type
+      dw   0002H           ;; Specification Version (BCD)
+      db   02H             ;; Device class
+      db   00H             ;; Device sub-class
+      db   00H             ;; Device sub-sub-class
+      db   64              ;; Maximum packet size
+      dw   0B404H          ;; Vendor ID
+      dw   1747H           ;; Product ID
+      dw   0000H           ;; Product version ID
+      db   1               ;; Manufacturer string index
+      db   2               ;; Product string index
+      db   0               ;; Serial number string index
+      db   1               ;; Number of configurations
 
 DeviceQualDscr:
-      db   DSCR_DEVQUAL_LEN   ;; Descriptor length
-      db   DSCR_DEVQUAL   ;; Decriptor type
-      dw   0002H      ;; Specification Version (BCD)
-      db   02H        ;; Device class
-      db   00H         ;; Device sub-class
-      db   00H         ;; Device sub-sub-class
-      db   64         ;; Maximum packet size
-      db   1         ;; Number of configurations
-      db   0         ;; Reserved
+      db   DSCR_DEVQUAL_LEN ;; Descriptor length
+      db   DSCR_DEVQUAL     ;; Decriptor type
+      dw   0002H            ;; Specification Version (BCD)
+      db   02H              ;; Device class
+      db   00H              ;; Device sub-class
+      db   00H              ;; Device sub-sub-class
+      db   64               ;; Maximum packet size
+      db   1                ;; Number of configurations
+      db   0                ;; Reserved
 
 HighSpeedConfigDscr:   
-      db   DSCR_CONFIG_LEN               ;; Descriptor length
-      db   DSCR_CONFIG                  ;; Descriptor type
+      db   DSCR_CONFIG_LEN  ;; Descriptor length
+      db   DSCR_CONFIG      ;; Descriptor type
       db   (HighSpeedConfigDscrEnd-HighSpeedConfigDscr) mod 256 ;; Total Length (LSB)
       db   (HighSpeedConfigDscrEnd-HighSpeedConfigDscr)  /  256 ;; Total Length (MSB)
-      db   2      ;; Number of interfaces
-      db   1      ;; Configuration number
-      db   0      ;; Configuration string
-      db   10100000b   ;; Attributes (b7 - buspwr, b6 - selfpwr, b5 - rwu)
-      db   100      ;; Power requirement (div 2 ma)
+      db   2                ;; Number of interfaces
+      db   1                ;; Configuration number
+      db   0                ;; Configuration string
+      db   10100000b        ;; Attributes (b7 - buspwr, b6 - selfpwr, b5 - rwu)
+      db   100              ;; Power requirement (div 2 ma)
 
 ;; Interface Descriptor
-      db   DSCR_INTRFC_LEN      ;; Descriptor length
-      db   DSCR_INTRFC         ;; Descriptor type
+      db   DSCR_INTRFC_LEN ;; Descriptor length
+      db   DSCR_INTRFC     ;; Descriptor type
       db   0               ;; Zero-based index of this interface
       db   0               ;; Alternate setting
       db   1               ;; Number of end points 
-      db   02H            ;; Interface class
-      db   02H               ;; Interface sub class
-      db   01H               ;; Interface sub sub class
+      db   02H             ;; Interface class
+      db   02H             ;; Interface sub class
+      db   01H             ;; Interface sub sub class
       db   0               ;; Interface descriptor string index
 
 ;; Header Functional Descriptor
@@ -135,19 +135,19 @@ HighSpeedConfigDscr:
       db   0                                                    ;; Interface descriptor string index
 
 ;; Endpoint Descriptor
-      db   DSCR_ENDPNT_LEN      ;; Descriptor length
-      db   DSCR_ENDPNT         ;; Descriptor type
+      db   DSCR_ENDPNT_LEN   ;; Descriptor length
+      db   DSCR_ENDPNT       ;; Descriptor type
       db   02H               ;; Endpoint number, and direction
-      db   ET_BULK            ;; Endpoint type
+      db   ET_BULK           ;; Endpoint type
       db   00H               ;; Maximun packet size (LSB)
       db   02H               ;; Max packect size (MSB)
       db   00H               ;; Polling interval
 
 ;; Endpoint Descriptor
-      db   DSCR_ENDPNT_LEN      ;; Descriptor length
-      db   DSCR_ENDPNT         ;; Descriptor type
+      db   DSCR_ENDPNT_LEN   ;; Descriptor length
+      db   DSCR_ENDPNT       ;; Descriptor type
       db   86H               ;; Endpoint number, and direction
-      db   ET_BULK            ;; Endpoint type
+      db   ET_BULK           ;; Endpoint type
       db   00H               ;; Maximun packet size (LSB)
       db   02H               ;; Max packect size (MSB)
       db   00H               ;; Polling interval
@@ -155,26 +155,26 @@ HighSpeedConfigDscr:
 HighSpeedConfigDscrEnd:   
 
 FullSpeedConfigDscr:   
-      db   DSCR_CONFIG_LEN               ;; Descriptor length
-      db   DSCR_CONFIG                  ;; Descriptor type
+      db   DSCR_CONFIG_LEN   ;; Descriptor length
+      db   DSCR_CONFIG       ;; Descriptor type
       db   (FullSpeedConfigDscrEnd-FullSpeedConfigDscr) mod 256 ;; Total Length (LSB)
       db   (FullSpeedConfigDscrEnd-FullSpeedConfigDscr)  /  256 ;; Total Length (MSB)
-      db   2      ;; Number of interfaces
-      db   1      ;; Configuration number
-      db   0      ;; Configuration string
-      db   10100000b   ;; Attributes (b7 - buspwr, b6 - selfpwr, b5 - rwu)
-      db   100      ;; Power requirement (div 2 ma)
+      db   2                 ;; Number of interfaces
+      db   1                 ;; Configuration number
+      db   0                 ;; Configuration string
+      db   10100000b         ;; Attributes (b7 - buspwr, b6 - selfpwr, b5 - rwu)
+      db   100               ;; Power requirement (div 2 ma)
 
 ;; Interface Descriptor
-      db   DSCR_INTRFC_LEN      ;; Descriptor length
-      db   DSCR_INTRFC         ;; Descriptor type
-      db   0               ;; Zero-based index of this interface
-      db   0               ;; Alternate setting
-      db   1               ;; Number of end points 
-      db   02H            ;; Interface class
+      db   DSCR_INTRFC_LEN   ;; Descriptor length
+      db   DSCR_INTRFC       ;; Descriptor type
+      db   0                 ;; Zero-based index of this interface
+      db   0                 ;; Alternate setting
+      db   1                 ;; Number of end points 
+      db   02H               ;; Interface class
       db   02H               ;; Interface sub class
       db   01H               ;; Interface sub sub class
-      db   0               ;; Interface descriptor string index
+      db   0                 ;; Interface descriptor string index
 
 ;; Header Functional Descriptor
       db   05H							;; Descriptor Size in Bytes (5)
@@ -225,19 +225,19 @@ FullSpeedConfigDscr:
 
 
 ;; Endpoint Descriptor
-      db   DSCR_ENDPNT_LEN      ;; Descriptor length
-      db   DSCR_ENDPNT         ;; Descriptor type
+      db   DSCR_ENDPNT_LEN   ;; Descriptor length
+      db   DSCR_ENDPNT       ;; Descriptor type
       db   02H               ;; Endpoint number, and direction
-      db   ET_BULK            ;; Endpoint type
+      db   ET_BULK           ;; Endpoint type
       db   40H               ;; Maximun packet size (LSB)
       db   00H               ;; Max packect size (MSB)
       db   00H               ;; Polling interval
 
 ;; Endpoint Descriptor
-      db   DSCR_ENDPNT_LEN      ;; Descriptor length
-      db   DSCR_ENDPNT         ;; Descriptor type
+      db   DSCR_ENDPNT_LEN   ;; Descriptor length
+      db   DSCR_ENDPNT       ;; Descriptor type
       db   86H               ;; Endpoint number, and direction
-      db   ET_BULK            ;; Endpoint type
+      db   ET_BULK           ;; Endpoint type
       db   40H               ;; Maximun packet size (LSB)
       db   00H               ;; Max packect size (MSB)
       db   00H               ;; Polling interval
@@ -267,33 +267,30 @@ StringDscr1End:
 StringDscr2:   
       db   StringDscr2End-StringDscr2      ;; Descriptor length
       db   DSCR_STRING
-      db   'E',00
-      db   'Z',00
-      db   '-',00
-      db   'U',00
+      db   'T',00
+      db   'e',00
+      db   'r',00
+      db   'a',00
       db   'S',00
-      db   'B',00
+      db   'e',00
+      db   'n',00
+      db   's',00
+      db   'e',00
       db   ' ',00
-      db   'F',00
-      db   'X',00
-      db   '2',00
+      db   'i',00
+      db   'm',00
+      db   'a',00
+      db   'g',00
+      db   'i',00
+      db   'n',00
+      db   'g',00
       db   ' ',00
-      db   'V',00
-      db   'I',00
-      db   'R',00
-      db   'T',00
-      db   'U',00
-      db   'A',00
-      db   'L',00
-      db   ' ',00
-      db   'C',00
-      db   'O',00
-      db   'M',00
-      db   ' ',00
-      db   'P',00
-      db   'O',00
-      db   'R',00
-      db   'T',00
+      db   'd',00
+      db   'e',00
+      db   'v',00
+      db   'i',00
+      db   'c',00
+      db   'e',00
 
 StringDscr2End:
 
