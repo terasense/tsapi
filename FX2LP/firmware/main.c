@@ -91,7 +91,13 @@ void main(void)
    EA = 1;                  // Enable 8051 interrupts
 
 #ifndef NO_RENUM
-   EZUSB_Discon(TRUE);   // renumerate
+   // Renumerate if necessary.  Do this by checking the renum bit.  If it
+   // is already set, there is no need to renumerate.  The renum bit will
+   // already be set if this firmware was loaded from an eeprom.
+   if (!(USBCS & bmRENUM))
+   {
+       EZUSB_Discon(TRUE);   // renumerate
+   }
 #endif
 
    // unconditionally re-connect.  If we loaded from eeprom we are
