@@ -25,8 +25,8 @@ static BYTE NeedZlp;
 // Alarm callback fired when alarm tick counter reach zero. Returns new counter value.
 WORD timer_alarm(void)
 {
-   Reenum = TRUE;
-   return 1000; // 10 sec
+	Reenum = TRUE;
+	return 1000; // 10 sec
 }
 
 //-----------------------------------------------------------------------------
@@ -36,66 +36,66 @@ WORD timer_alarm(void)
 
 void TD_Init(void)             // Called once at startup
 {
-   // set the CPU clock to 48MHz
-   CPUCS = ((CPUCS & ~bmCLKSPD) | bmCLKSPD1) ;
+	// set the CPU clock to 48MHz
+	CPUCS = ((CPUCS & ~bmCLKSPD) | bmCLKSPD1) ;
 
-   // set the slave FIFO interface to 48MHz
-   IFCONFIG |= 0x40;
+	// set the slave FIFO interface to 48MHz
+	IFCONFIG |= 0x40;
 
-  // Registers which require a synchronization delay, see section 15.14
-  // FIFORESET        FIFOPINPOLAR
-  // INPKTEND         OUTPKTEND
-  // EPxBCH:L         REVCTL
-  // GPIFTCB3         GPIFTCB2
-  // GPIFTCB1         GPIFTCB0
-  // EPxFIFOPFH:L     EPxAUTOINLENH:L
-  // EPxFIFOCFG       EPxGPIFFLGSEL
-  // PINFLAGSxx       EPxFIFOIRQ
-  // EPxFIFOIE        GPIFIRQ
-  // GPIFIE           GPIFADRH:L
-  // UDMACRCH:L       EPxGPIFTRIG
-  // GPIFTRIG
-  
-  // Note: The pre-REVE EPxGPIFTCH/L register are affected, as well...
-  //      ...these have been replaced by GPIFTC[B3:B0] registers
+	// Registers which require a synchronization delay, see section 15.14
+	// FIFORESET        FIFOPINPOLAR
+	// INPKTEND         OUTPKTEND
+	// EPxBCH:L         REVCTL
+	// GPIFTCB3         GPIFTCB2
+	// GPIFTCB1         GPIFTCB0
+	// EPxFIFOPFH:L     EPxAUTOINLENH:L
+	// EPxFIFOCFG       EPxGPIFFLGSEL
+	// PINFLAGSxx       EPxFIFOIRQ
+	// EPxFIFOIE        GPIFIRQ
+	// GPIFIE           GPIFADRH:L
+	// UDMACRCH:L       EPxGPIFTRIG
+	// GPIFTRIG
 
-  // default: all endpoints have their VALID bit set
-  // default: TYPE1 = 1 and TYPE0 = 0 --> BULK  
-  // default: EP2 and EP4 DIR bits are 0 (OUT direction)
-  // default: EP6 and EP8 DIR bits are 1 (IN direction)
-  // default: EP2, EP4, EP6, and EP8 are double buffered
+	// Note: The pre-REVE EPxGPIFTCH/L register are affected, as well...
+	//      ...these have been replaced by GPIFTC[B3:B0] registers
 
-  // we are just using the default values, yes this is not necessary...
-  EP1OUTCFG = 0xA0;
-  SYNCDELAY;           // see TRM section 15.14
-  EP1INCFG = 0xB0;     // Configure EP1IN as BULK IN EP
-  SYNCDELAY;
-  EP2CFG = 0xA2;
-  SYNCDELAY;                    
-  EP4CFG = 0x7F;       // Invalid EP
-  SYNCDELAY;                    
-  EP6CFG = 0xE2;
-  SYNCDELAY;                    
-  EP8CFG = 0x7F;       // Invalid EP
+	// default: all endpoints have their VALID bit set
+	// default: TYPE1 = 1 and TYPE0 = 0 --> BULK  
+	// default: EP2 and EP4 DIR bits are 0 (OUT direction)
+	// default: EP6 and EP8 DIR bits are 1 (IN direction)
+	// default: EP2, EP4, EP6, and EP8 are double buffered
 
-  // out endpoints do not come up armed
-  
-  // since the defaults are double buffered we must write dummy byte counts (setting SKIP bit) twice
-  SYNCDELAY;                    
-  EP2BCL = 0x80;                // arm EP2OUT by writing byte count w/skip.
-  SYNCDELAY;                    
-  EP2BCL = 0x80;
+	// we are just using the default values, yes this is not necessary...
+	EP1OUTCFG = 0xA0;
+	SYNCDELAY;           // see TRM section 15.14
+	EP1INCFG = 0xB0;     // Configure EP1IN as BULK IN EP
+	SYNCDELAY;
+	EP2CFG = 0xA2;
+	SYNCDELAY;                    
+	EP4CFG = 0x7F;       // Invalid EP
+	SYNCDELAY;                    
+	EP6CFG = 0xE2;
+	SYNCDELAY;                    
+	EP8CFG = 0x7F;       // Invalid EP
 
-  Rwuen = TRUE;                 // Enable remote-wakeup
+	// out endpoints do not come up armed
 
-  // enable dual autopointer feature
-  AUTOPTRSETUP |= 0x01;
+	// since the defaults are double buffered we must write dummy byte counts (setting SKIP bit) twice
+	SYNCDELAY;                    
+	EP2BCL = 0x80;                // arm EP2OUT by writing byte count w/skip.
+	SYNCDELAY;                    
+	EP2BCL = 0x80;
 
-  // Enable 100Hz timer
-  timer_init(1000); // 10 sec to alarm
+	Rwuen = TRUE;                 // Enable remote-wakeup
 
-  HighSpeed = FALSE;
-  NeedZlp   = FALSE;
+	// enable dual autopointer feature
+	AUTOPTRSETUP |= 0x01;
+
+	// Enable 100Hz timer
+	timer_init(1000); // 10 sec to alarm
+
+	HighSpeed = FALSE;
+	NeedZlp   = FALSE;
 }
 
 void TD_Poll(void)              // Called repeatedly while the device is idle
@@ -105,66 +105,66 @@ void TD_Poll(void)              // Called repeatedly while the device is idle
 
   if (!(EP2468STAT & bmEP2EMPTY))
   { // check EP2 EMPTY(busy) bit in EP2468STAT (SFR), core set's this bit when FIFO is empty
-     if (!(EP2468STAT & bmEP6FULL))
-     {  // check EP6 FULL(busy) bit in EP2468STAT (SFR), core set's this bit when FIFO is full
-        APTR1H = MSB( &EP2FIFOBUF );
-        APTR1L = LSB( &EP2FIFOBUF );
+	  if (!(EP2468STAT & bmEP6FULL))
+	  {  // check EP6 FULL(busy) bit in EP2468STAT (SFR), core set's this bit when FIFO is full
+		  APTR1H = MSB( &EP2FIFOBUF );
+		  APTR1L = LSB( &EP2FIFOBUF );
 
-        AUTOPTRH2 = MSB( &EP6FIFOBUF );
-        AUTOPTRL2 = LSB( &EP6FIFOBUF );
+		  AUTOPTRH2 = MSB( &EP6FIFOBUF );
+		  AUTOPTRL2 = LSB( &EP6FIFOBUF );
 
-        count = (EP2BCH << 8) + EP2BCL;
+		  count = (EP2BCH << 8) + EP2BCL;
 
-        // loop EP2OUT buffer data to EP6IN
-        for( i = 0x0000; i < count; i++ )
-        {
-           // setup to transfer EP2OUT buffer to EP6IN buffer using AUTOPOINTER(s)
-           EXTAUTODAT2 = EXTAUTODAT1;
-        }
-        EP6BCH = EP2BCH;  
-        SYNCDELAY;  
-        EP6BCL = EP2BCL;        // arm EP6IN
-        SYNCDELAY;                    
-        EP2BCL = 0x80;          // re(arm) EP2OUT
-        NeedZlp = (count == MAX_PACKET);
-     }
+		  // loop EP2OUT buffer data to EP6IN
+		  for( i = 0x0000; i < count; i++ )
+		  {
+			  // setup to transfer EP2OUT buffer to EP6IN buffer using AUTOPOINTER(s)
+			  EXTAUTODAT2 = EXTAUTODAT1;
+		  }
+		  EP6BCH = EP2BCH;  
+		  SYNCDELAY;  
+		  EP6BCL = EP2BCL;        // arm EP6IN
+		  SYNCDELAY;                    
+		  EP2BCL = 0x80;          // re(arm) EP2OUT
+		  NeedZlp = (count == MAX_PACKET);
+	  }
   }
 
   if (EP2468STAT & bmEP6EMPTY)
   {
-     if (NeedZlp) {
-        NeedZlp = FALSE;
-        // Send zero length packet to flush host buffer
-        EP6BCH = 0;
-        EP6BCL = 0;
-     }
+	  if (NeedZlp) {
+		  NeedZlp = FALSE;
+		  // Send zero length packet to flush host buffer
+		  EP6BCH = 0;
+		  EP6BCL = 0;
+	  }
   }
 
   // Serial State Notification that has to be sent periodically to the host
   if (!(EP1INCS & 0x02))      // check if EP1IN is available
   {
-    EP1INBUF[0] = 0x0A;       // if it is available, then fill the first 10 bytes of the buffer with 
-    EP1INBUF[1] = 0x20;       // appropriate data. 
-    EP1INBUF[2] = 0x00;
-    EP1INBUF[3] = 0x00;
-    EP1INBUF[4] = 0x00;
-    EP1INBUF[5] = 0x00;
-    EP1INBUF[6] = 0x00;
-    EP1INBUF[7] = 0x02;
-    EP1INBUF[8] = 0x00;
-    EP1INBUF[9] = 0x00;
-    EP1INBC = 10;            // manually commit once the buffer is filled
+	 EP1INBUF[0] = 0x0A;       // if it is available, then fill the first 10 bytes of the buffer with 
+	 EP1INBUF[1] = 0x20;       // appropriate data. 
+	 EP1INBUF[2] = 0x00;
+	 EP1INBUF[3] = 0x00;
+	 EP1INBUF[4] = 0x00;
+	 EP1INBUF[5] = 0x00;
+	 EP1INBUF[6] = 0x00;
+	 EP1INBUF[7] = 0x02;
+	 EP1INBUF[8] = 0x00;
+	 EP1INBUF[9] = 0x00;
+	 EP1INBC = 10;            // manually commit once the buffer is filled
   }
 }
 
 BOOL TD_Suspend(void)          // Called before the device goes into suspend mode
 {
-   return(TRUE);
+	return(TRUE);
 }
 
 BOOL TD_Resume(void)          // Called after the device resumes
 {
-   return(TRUE);
+	return(TRUE);
 }
 
 //-----------------------------------------------------------------------------
@@ -174,50 +174,50 @@ BOOL TD_Resume(void)          // Called after the device resumes
 
 BOOL DR_GetDescriptor(void)
 {
-   return(TRUE);
+	return(TRUE);
 }
 
 BOOL DR_SetConfiguration(void)   // Called when a Set Configuration command is received
 {
-   Configuration = SETUPDAT[2];
-   return(TRUE);            // Handled by user code
+	Configuration = SETUPDAT[2];
+	return(TRUE);            // Handled by user code
 }
 
 BOOL DR_GetConfiguration(void)   // Called when a Get Configuration command is received
 {
-   EP0BUF[0] = Configuration;
-   EP0BCH = 0;
-   EP0BCL = 1;
-   return(TRUE);            // Handled by user code
+	EP0BUF[0] = Configuration;
+	EP0BCH = 0;
+	EP0BCL = 1;
+	return(TRUE);            // Handled by user code
 }
 
 BOOL DR_SetInterface(void)       // Called when a Set Interface command is received
 {
-   AlternateSetting = SETUPDAT[2];
-   return(TRUE);            // Handled by user code
+	AlternateSetting = SETUPDAT[2];
+	return(TRUE);            // Handled by user code
 }
 
 BOOL DR_GetInterface(void)       // Called when a Set Interface command is received
 {
-   EP0BUF[0] = AlternateSetting;
-   EP0BCH = 0;
-   EP0BCL = 1;
-   return(TRUE);            // Handled by user code
+	EP0BUF[0] = AlternateSetting;
+	EP0BCH = 0;
+	EP0BCL = 1;
+	return(TRUE);            // Handled by user code
 }
 
 BOOL DR_GetStatus(void)
 {
-   return(TRUE);
+	return(TRUE);
 }
 
 BOOL DR_ClearFeature(void)
 {
-   return(TRUE);
+	return(TRUE);
 }
 
 BOOL DR_SetFeature(void)
 {
-   return(TRUE);
+	return(TRUE);
 }
 
 BOOL DR_VendorCmnd(void)
@@ -226,20 +226,20 @@ BOOL DR_VendorCmnd(void)
   
   switch (SETUPDAT[1])
   {
-     case VR_NAKALL_ON:
-        tmp = FIFORESET;
-        tmp |= bmNAKALL;      
-        SYNCDELAY;                    
-        FIFORESET = tmp;
-        break;
-     case VR_NAKALL_OFF:
-        tmp = FIFORESET;
-        tmp &= ~bmNAKALL;      
-        SYNCDELAY;                    
-        FIFORESET = tmp;
-        break;
-     default:
-        return(TRUE);
+	  case VR_NAKALL_ON:
+		  tmp = FIFORESET;
+		  tmp |= bmNAKALL;      
+		  SYNCDELAY;                    
+		  FIFORESET = tmp;
+		  break;
+	  case VR_NAKALL_OFF:
+		  tmp = FIFORESET;
+		  tmp &= ~bmNAKALL;      
+		  SYNCDELAY;                    
+		  FIFORESET = tmp;
+		  break;
+	  default:
+		  return(TRUE);
   }
 
   return(FALSE);
@@ -253,63 +253,63 @@ BOOL DR_VendorCmnd(void)
 // Setup Data Available Interrupt Handler
 void ISR_Sudav(void) interrupt 0
 {
-   GotSUD = TRUE;            // Set flag
-   EZUSB_IRQ_CLEAR();
-   USBIRQ = bmSUDAV;         // Clear SUDAV IRQ
+	GotSUD = TRUE;            // Set flag
+	EZUSB_IRQ_CLEAR();
+	USBIRQ = bmSUDAV;         // Clear SUDAV IRQ
 }
 
 // Setup Token Interrupt Handler
 void ISR_Sutok(void) interrupt 0
 {
-   EZUSB_IRQ_CLEAR();
-   USBIRQ = bmSUTOK;         // Clear SUTOK IRQ
+	EZUSB_IRQ_CLEAR();
+	USBIRQ = bmSUTOK;         // Clear SUTOK IRQ
 }
 
 void ISR_Sof(void) interrupt 0
 {
-   EZUSB_IRQ_CLEAR();
-   USBIRQ = bmSOF;            // Clear SOF IRQ
+	EZUSB_IRQ_CLEAR();
+	USBIRQ = bmSOF;            // Clear SOF IRQ
 
-   if (FNADDR != 0) {
-      timer_alarm_update(10);
-   }
+	if (FNADDR != 0) {
+		timer_alarm_update(10);
+	}
 }
 
 void ISR_Ures(void) interrupt 0
 {
-   HighSpeed = FALSE;
+	HighSpeed = FALSE;
 
-   // whenever we get a USB reset, we should revert to full speed mode
-   pConfigDscr = pFullSpeedConfigDscr;
-   ((CONFIGDSCR xdata *) pConfigDscr)->type = CONFIG_DSCR;
-   pOtherConfigDscr = pHighSpeedConfigDscr;
-   ((CONFIGDSCR xdata *) pOtherConfigDscr)->type = OTHERSPEED_DSCR;
+	// whenever we get a USB reset, we should revert to full speed mode
+	pConfigDscr = pFullSpeedConfigDscr;
+	((CONFIGDSCR xdata *) pConfigDscr)->type = CONFIG_DSCR;
+	pOtherConfigDscr = pHighSpeedConfigDscr;
+	((CONFIGDSCR xdata *) pOtherConfigDscr)->type = OTHERSPEED_DSCR;
 
-   EZUSB_IRQ_CLEAR();
-   USBIRQ = bmURES;         // Clear URES IRQ
+	EZUSB_IRQ_CLEAR();
+	USBIRQ = bmURES;         // Clear URES IRQ
 }
 
 void ISR_Susp(void) interrupt 0
 {
-   Sleep = TRUE;
-   EZUSB_IRQ_CLEAR();
-   USBIRQ = bmSUSP;
+	Sleep = TRUE;
+	EZUSB_IRQ_CLEAR();
+	USBIRQ = bmSUSP;
 }
 
 void ISR_Highspeed(void) interrupt 0
 {
-   if (EZUSB_HIGHSPEED())
-   {
-      HighSpeed = TRUE;
+	if (EZUSB_HIGHSPEED())
+	{
+		HighSpeed = TRUE;
 
-      pConfigDscr = pHighSpeedConfigDscr;
-      ((CONFIGDSCR xdata *) pConfigDscr)->type = CONFIG_DSCR;
-      pOtherConfigDscr = pFullSpeedConfigDscr;
-      ((CONFIGDSCR xdata *) pOtherConfigDscr)->type = OTHERSPEED_DSCR;
-   }
+		pConfigDscr = pHighSpeedConfigDscr;
+		((CONFIGDSCR xdata *) pConfigDscr)->type = CONFIG_DSCR;
+		pOtherConfigDscr = pFullSpeedConfigDscr;
+		((CONFIGDSCR xdata *) pOtherConfigDscr)->type = OTHERSPEED_DSCR;
+	}
 
-   EZUSB_IRQ_CLEAR();
-   USBIRQ = bmHSGRANT;
+	EZUSB_IRQ_CLEAR();
+	USBIRQ = bmHSGRANT;
 }
 void ISR_Ep0ack(void) interrupt 0
 {
