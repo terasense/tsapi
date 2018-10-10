@@ -100,61 +100,61 @@ void TD_Init(void)             // Called once at startup
 
 void TD_Poll(void)              // Called repeatedly while the device is idle
 {
-  WORD i;
-  WORD count;
+	WORD i;
+	WORD count;
 
-  if (!(EP2468STAT & bmEP2EMPTY))
-  { // check EP2 EMPTY(busy) bit in EP2468STAT (SFR), core set's this bit when FIFO is empty
-	  if (!(EP2468STAT & bmEP6FULL))
-	  {  // check EP6 FULL(busy) bit in EP2468STAT (SFR), core set's this bit when FIFO is full
-		  APTR1H = MSB( &EP2FIFOBUF );
-		  APTR1L = LSB( &EP2FIFOBUF );
+	if (!(EP2468STAT & bmEP2EMPTY))
+	{ // check EP2 EMPTY(busy) bit in EP2468STAT (SFR), core set's this bit when FIFO is empty
+		if (!(EP2468STAT & bmEP6FULL))
+		{  // check EP6 FULL(busy) bit in EP2468STAT (SFR), core set's this bit when FIFO is full
+			APTR1H = MSB( &EP2FIFOBUF );
+			APTR1L = LSB( &EP2FIFOBUF );
 
-		  AUTOPTRH2 = MSB( &EP6FIFOBUF );
-		  AUTOPTRL2 = LSB( &EP6FIFOBUF );
+			AUTOPTRH2 = MSB( &EP6FIFOBUF );
+			AUTOPTRL2 = LSB( &EP6FIFOBUF );
 
-		  count = (EP2BCH << 8) + EP2BCL;
+			count = (EP2BCH << 8) + EP2BCL;
 
-		  // loop EP2OUT buffer data to EP6IN
-		  for( i = 0x0000; i < count; i++ )
-		  {
-			  // setup to transfer EP2OUT buffer to EP6IN buffer using AUTOPOINTER(s)
-			  EXTAUTODAT2 = EXTAUTODAT1;
-		  }
-		  EP6BCH = EP2BCH;  
-		  SYNCDELAY;  
-		  EP6BCL = EP2BCL;        // arm EP6IN
-		  SYNCDELAY;                    
-		  EP2BCL = 0x80;          // re(arm) EP2OUT
-		  NeedZlp = (count == MAX_PACKET);
-	  }
-  }
+			// loop EP2OUT buffer data to EP6IN
+			for( i = 0x0000; i < count; i++ )
+			{
+				// setup to transfer EP2OUT buffer to EP6IN buffer using AUTOPOINTER(s)
+				EXTAUTODAT2 = EXTAUTODAT1;
+			}
+			EP6BCH = EP2BCH;  
+			SYNCDELAY;  
+			EP6BCL = EP2BCL;        // arm EP6IN
+			SYNCDELAY;                    
+			EP2BCL = 0x80;          // re(arm) EP2OUT
+			NeedZlp = (count == MAX_PACKET);
+		}
+	}
 
-  if (EP2468STAT & bmEP6EMPTY)
-  {
-	  if (NeedZlp) {
-		  NeedZlp = FALSE;
-		  // Send zero length packet to flush host buffer
-		  EP6BCH = 0;
-		  EP6BCL = 0;
-	  }
-  }
+	if (EP2468STAT & bmEP6EMPTY)
+	{
+		if (NeedZlp) {
+			NeedZlp = FALSE;
+			// Send zero length packet to flush host buffer
+			EP6BCH = 0;
+			EP6BCL = 0;
+		}
+	}
 
-  // Serial State Notification that has to be sent periodically to the host
-  if (!(EP1INCS & 0x02))      // check if EP1IN is available
-  {
-	 EP1INBUF[0] = 0x0A;       // if it is available, then fill the first 10 bytes of the buffer with 
-	 EP1INBUF[1] = 0x20;       // appropriate data. 
-	 EP1INBUF[2] = 0x00;
-	 EP1INBUF[3] = 0x00;
-	 EP1INBUF[4] = 0x00;
-	 EP1INBUF[5] = 0x00;
-	 EP1INBUF[6] = 0x00;
-	 EP1INBUF[7] = 0x02;
-	 EP1INBUF[8] = 0x00;
-	 EP1INBUF[9] = 0x00;
-	 EP1INBC = 10;            // manually commit once the buffer is filled
-  }
+	// Serial State Notification that has to be sent periodically to the host
+	if (!(EP1INCS & 0x02))      // check if EP1IN is available
+	{
+		EP1INBUF[0] = 0x0A;       // if it is available, then fill the first 10 bytes of the buffer with 
+		EP1INBUF[1] = 0x20;       // appropriate data. 
+		EP1INBUF[2] = 0x00;
+		EP1INBUF[3] = 0x00;
+		EP1INBUF[4] = 0x00;
+		EP1INBUF[5] = 0x00;
+		EP1INBUF[6] = 0x00;
+		EP1INBUF[7] = 0x02;
+		EP1INBUF[8] = 0x00;
+		EP1INBUF[9] = 0x00;
+		EP1INBC = 10;            // manually commit once the buffer is filled
+	}
 }
 
 BOOL TD_Suspend(void)          // Called before the device goes into suspend mode
