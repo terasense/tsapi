@@ -16,11 +16,15 @@
 #include "timer.h"
 #include "main.h"
 #include "poll.h"
+#include "commands.h"
 
 static BYTE Configuration;             // Current configuration
 static BYTE AlternateSetting;          // Alternate settings
 static BYTE HighSpeed;
 static BYTE NeedZlp;
+
+static xdata ts_usb_cmd_t CurrCmd;
+static WORD         InBytesPending;
 
 // Alarm callback fired when alarm tick counter reach zero. Returns new counter value.
 WORD timer_alarm(void)
@@ -96,50 +100,104 @@ void TD_Init(void)             // Called once at startup
 
 	HighSpeed = FALSE;
 	NeedZlp   = FALSE;
+
+	CmdInit();
+	CurrCmd.cmd = 0;
 }
 
-void TD_Poll(void)              // Called repeatedly while the device is idle
+static void PollCommands(void)
 {
-	WORD i;
-	WORD count;
+	WORD inBytes = InBytesPending, outBytes = 0;
+	BYTE xdata *ptr, *end;
 
-	if (!(EP2468STAT & bmEP2EMPTY))
-	{ // check EP2 EMPTY(busy) bit in EP2468STAT (SFR), core set's this bit when FIFO is empty
-		if (!(EP2468STAT & bmEP6FULL))
-		{  // check EP6 FULL(busy) bit in EP2468STAT (SFR), core set's this bit when FIFO is full
-			APTR1H = MSB( &EP2FIFOBUF );
-			APTR1L = LSB( &EP2FIFOBUF );
+	if (CurrCmd.cmd & CMD_RESP) {
+		// We have command response pending
+		if (EP2468STAT & bmEP6FULL)
+			// Wait till we have room for it
+			return;
 
-			AUTOPTRH2 = MSB( &EP6FIFOBUF );
-			AUTOPTRL2 = LSB( &EP6FIFOBUF );
-
-			count = (EP2BCH << 8) + EP2BCL;
-
-			// loop EP2OUT buffer data to EP6IN
-			for( i = 0x0000; i < count; i++ )
-			{
-				// setup to transfer EP2OUT buffer to EP6IN buffer using AUTOPOINTER(s)
-				EXTAUTODAT2 = EXTAUTODAT1;
-			}
-			EP6BCH = EP2BCH;  
-			SYNCDELAY;  
-			EP6BCL = EP2BCL;        // arm EP6IN
-			SYNCDELAY;                    
-			EP2BCL = 0x80;          // re(arm) EP2OUT
-			NeedZlp = (count == MAX_PACKET);
+		// Copy command response to the output pipe
+		AUTOPTRH2 = MSB( &EP6FIFOBUF );
+		AUTOPTRL2 = LSB( &EP6FIFOBUF );
+		for (ptr = (BYTE*)&CurrCmd, end = ptr + sizeof(CurrCmd); ptr < end; ++ptr) {
+			EXTAUTODAT2 = *ptr;
+			++outBytes;
 		}
+		CurrCmd.cmd = 0;
 	}
 
+	if (!outBytes && !inBytes && !(EP2468STAT & bmEP2EMPTY)) {
+		// Has input data to process
+		inBytes = (EP2BCH << 8) + EP2BCL;
+		// Check input length
+		if (inBytes % TS_USB_PKT_LEN) {
+			CmdSetError(TS_ERR_PROTO);
+			EP2BCL = 0x80;  // re(arm) EP2OUT
+			return;
+		}
+		// Setup auto pointer
+		APTR1H = MSB( &EP2FIFOBUF );
+		APTR1L = LSB( &EP2FIFOBUF );
+		InBytesPending = inBytes;
+	}
+
+	// Process input packets
+	while (InBytesPending)
+	{
+		for (ptr = (BYTE*)&CurrCmd, end = ptr + sizeof(CurrCmd); ptr < end; ++ptr) {
+			*ptr = EXTAUTODAT1;
+			--InBytesPending;
+		}
+		CmdProcess(&CurrCmd);
+		if (CurrCmd.cmd & CMD_RESP) {
+			// We have to send response
+			if (!outBytes) {
+				if (EP2468STAT & bmEP6FULL) {
+					// No room for it
+					break;
+				}
+				AUTOPTRH2 = MSB( &EP6FIFOBUF );
+				AUTOPTRL2 = LSB( &EP6FIFOBUF );				
+			}
+			for (ptr = (BYTE*)&CurrCmd, end = ptr + sizeof(CurrCmd); ptr < end; ++ptr) {
+				EXTAUTODAT2 = *ptr;
+				++outBytes;
+			}
+		}
+		CurrCmd.cmd = 0;
+	}
+
+	if (outBytes) {
+		// Submit response packets to EP6IN
+		EP6BCH = outBytes >> 8;  
+		SYNCDELAY;
+		EP6BCL = outBytes;
+		SYNCDELAY;
+		NeedZlp = (outBytes == MAX_PACKET);
+	}
+	if (inBytes && !InBytesPending) {
+		// All input processed	
+		EP2BCL = 0x80;   // re(arm) EP2OUT
+	}
+}
+
+static void CheckSendZlp(void)
+{
 	if (EP2468STAT & bmEP6EMPTY)
 	{
 		if (NeedZlp) {
 			NeedZlp = FALSE;
 			// Send zero length packet to flush host buffer
 			EP6BCH = 0;
+			SYNCDELAY;
 			EP6BCL = 0;
+			SYNCDELAY;
 		}
 	}
+}
 
+static void PollControl(void)
+{
 	// Serial State Notification that has to be sent periodically to the host
 	if (!(EP1INCS & 0x02))      // check if EP1IN is available
 	{
@@ -155,6 +213,13 @@ void TD_Poll(void)              // Called repeatedly while the device is idle
 		EP1INBUF[9] = 0x00;
 		EP1INBC = 10;            // manually commit once the buffer is filled
 	}
+}
+
+void TD_Poll(void)             // Called repeatedly while the device is idle
+{
+	PollCommands();
+	CheckSendZlp();
+	PollControl();
 }
 
 BOOL TD_Suspend(void)          // Called before the device goes into suspend mode
