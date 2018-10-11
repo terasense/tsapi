@@ -330,11 +330,19 @@ void ISR_Sutok(void) interrupt 0
 	USBIRQ = bmSUTOK;         // Clear SUTOK IRQ
 }
 
+#ifdef DEBUG_LEDS
+static BYTE sof_cnt;
+#endif
+
 void ISR_Sof(void) interrupt 0
 {
 	EZUSB_IRQ_CLEAR();
 	USBIRQ = bmSOF;            // Clear SOF IRQ
 
+#ifdef DEBUG_LEDS
+	if (!sof_cnt++)
+		IOA ^= 1;
+#endif
 	if (FNADDR != 0) {
 		timer_alarm_update(10);
 	}

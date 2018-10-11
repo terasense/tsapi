@@ -62,6 +62,20 @@ const char code  EPCS_Offset_Lookup_Table[] =
 // Code
 //-----------------------------------------------------------------------------
 
+// renumerate
+static void reconnect(void)
+{
+#ifdef DEBUG_LEDS
+	IOA = 0xff;
+#endif
+	EZUSB_Discon(TRUE);
+	// Give the host 10 sec to enumerate
+	timer_alarm_update(1000);
+#ifdef DEBUG_LEDS
+	IOA = 0;
+#endif
+}
+
 // Task dispatcher
 void main(void)
 {
@@ -72,6 +86,10 @@ void main(void)
 	Reenum  = FALSE;             // Re-enumeration request
 	GotSUD = FALSE;              // Clear "Got setup data" flag
 
+#ifdef DEBUG_LEDS
+	OEA = 0xff;
+	IOA = 0;
+#endif
 	// Initialize user device
 	TD_Init();
 
@@ -96,7 +114,7 @@ void main(void)
 	// already be set if this firmware was loaded from an eeprom.
 	if (!(USBCS & bmRENUM))
 	{
-		 EZUSB_Discon(TRUE);   // renumerate
+		reconnect();
 	}
 #endif
 
@@ -116,9 +134,7 @@ void main(void)
 		// Reenumerate if necessary
 		if (Reenum)
 		{
-			EZUSB_Discon(TRUE);
-			// Give the host 10 sec to enumerate
-			timer_alarm_update(1000);
+			reconnect();
 			Reenum = FALSE;
 		}
 
