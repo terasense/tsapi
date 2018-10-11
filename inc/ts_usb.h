@@ -59,6 +59,13 @@ typedef struct ts_usb_info_data {
 
 BUILD_BUG_ON(sizeof(ts_usb_info_data_t) != TS_USB_CMD_BUF_SZ);
 
+#define TS_RST_FPGA 0x10
+
+typedef struct ts_usb_reset_data {
+	// With zero flags it reset error status and last sequence number
+	u8 flags;
+} ts_usb_reset_data_t;
+
 typedef struct ts_usb_eeprom_data {
 	u8  subaddr;
 	u8  size;

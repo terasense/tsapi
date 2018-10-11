@@ -38,6 +38,13 @@ static void cmdInfo(ts_usb_cmd_t xdata* cmd)
 	}
 }
 
+static void cmdReset(ts_usb_cmd_t xdata* cmd)
+{
+	ts_usb_reset_data_t* d = (ts_usb_reset_data_t*)cmd->buff;
+	// Reset command processor state
+	CmdInit();
+}
+
 void CmdProcess(ts_usb_cmd_t xdata* cmd)
 {
 	u8 command = cmd->cmd & CMD_MASK;
@@ -69,6 +76,9 @@ void CmdProcess(ts_usb_cmd_t xdata* cmd)
 	switch (command) {
 		case TS_INFO:
 			cmdInfo(cmd);
+			break;
+		case TS_RESET:
+			cmdReset(cmd);
 			break;
 		default:
 			CmdSetError(TS_ERR_PROTO);
