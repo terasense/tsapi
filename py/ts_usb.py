@@ -38,8 +38,21 @@ def cmd_serialize(cmd):
 	return h + cmd.data + '\0' * (CMD_BUF_SZ - len(cmd.data))
 
 def is_cmd_response(resp):
-	"""Check if string is command response"""
+	"""Check if the string is command response"""
 	return (ord(resp[0]) & CMD_RESP) != 0
+
+def chk_cmd_response(resp, req):
+	"""Check if the string is the response to the particular request"""
+	if len(resp) != PKT_LEN:
+		return False
+	cmd, sn = ord(resp[0]), ord(resp[1])
+	if (cmd & CMD_RESP) == 0:
+		return False
+	if (cmd & CMD_MASK) != req.cmd:
+		return False
+	if sn != req.sn:
+		return False
+	return True
 
 def cmd_deserialize(resp):
 	"""Create command response tuple from response string"""
