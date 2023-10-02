@@ -16,15 +16,11 @@
 #include "timer.h"
 #include "main.h"
 #include "poll.h"
-#include "commands.h"
 
 static BYTE Configuration;             // Current configuration
 static BYTE AlternateSetting;          // Alternate settings
 static BYTE HighSpeed;
-static BYTE NeedZlp;
-
-static xdata ts_usb_cmd_t CurrCmd;
-static WORD         InBytesPending;
+static BYTE NeedZlp; // TBD
 
 // Alarm callback fired when alarm tick counter reach zero. Returns new counter value.
 WORD timer_alarm(void)
@@ -100,84 +96,37 @@ void TD_Init(void)             // Called once at startup
 
 	HighSpeed = FALSE;
 	NeedZlp   = FALSE;
-
-	CmdInit();
-	CurrCmd.cmd = 0;
 }
 
-static void PollCommands(void)
+static void PollBuffers(void)
 {
-	WORD inBytes = InBytesPending, outBytes = 0;
-	BYTE xdata *ptr, *end;
+	WORD i, count;
 
-	if (CurrCmd.cmd & CMD_RESP) {
-		// We have command response pending
-		if (EP2468STAT & bmEP6FULL)
-			// Wait till we have room for it
-			return;
-
-		// Copy command response to the output pipe
-		AUTOPTRH2 = MSB( &EP6FIFOBUF );
-		AUTOPTRL2 = LSB( &EP6FIFOBUF );
-		for (ptr = (BYTE*)&CurrCmd, end = ptr + sizeof(CurrCmd); ptr < end; ++ptr) {
-			EXTAUTODAT2 = *ptr;
-			++outBytes;
-		}
-		CurrCmd.cmd = 0;
-	}
-
-	if (!outBytes && !inBytes && !(EP2468STAT & bmEP2EMPTY)) {
-		// Has input data to process
-		inBytes = (EP2BCH << 8) + EP2BCL;
-		// Check input length
-		if (inBytes % TS_USB_PKT_LEN) {
-			CmdSetError(TS_ERR_PROTO);
-			EP2BCL = 0x80;  // re(arm) EP2OUT
-			return;
-		}
-		// Setup auto pointer
-		APTR1H = MSB( &EP2FIFOBUF );
-		APTR1L = LSB( &EP2FIFOBUF );
-		InBytesPending = inBytes;
-	}
-
-	// Process input packets
-	while (InBytesPending)
+	if(!(EP2468STAT & bmEP2EMPTY))		// Is EP2-OUT buffer not empty (has at least one packet)?
 	{
-		for (ptr = (BYTE*)&CurrCmd, end = ptr + sizeof(CurrCmd); ptr < end; ++ptr) {
-			*ptr = EXTAUTODAT1;
-			--InBytesPending;
-		}
-		CmdProcess(&CurrCmd);
-		if (CurrCmd.cmd & CMD_RESP) {
-			// We have to send response
-			if (!outBytes) {
-				if (EP2468STAT & bmEP6FULL) {
-					// No room for it
-					break;
-				}
-				AUTOPTRH2 = MSB( &EP6FIFOBUF );
-				AUTOPTRL2 = LSB( &EP6FIFOBUF );				
-			}
-			for (ptr = (BYTE*)&CurrCmd, end = ptr + sizeof(CurrCmd); ptr < end; ++ptr) {
-				EXTAUTODAT2 = *ptr;
-				++outBytes;
-			}
-		}
-		CurrCmd.cmd = 0;
-	}
+		if(!(EP2468STAT & bmEP6FULL))	// YES: Is EP6-IN buffer not full (room for at least 1 pkt)?
+		{ 
+			APTR1H = MSB( &EP2FIFOBUF );
+			APTR1L = LSB( &EP2FIFOBUF );
+			AUTOPTRH2 = MSB( &EP6FIFOBUF );
+			AUTOPTRL2 = LSB( &EP6FIFOBUF );
 
-	if (outBytes) {
-		// Submit response packets to EP6IN
-		EP6BCH = outBytes >> 8;  
-		SYNCDELAY;
-		EP6BCL = outBytes;
-		SYNCDELAY;
-		NeedZlp = (outBytes == MAX_PACKET);
-	}
-	if (inBytes && !InBytesPending) {
-		// All input processed	
-		EP2BCL = 0x80;   // re(arm) EP2OUT
+			count = (EP2BCH << 8) + EP2BCL;
+
+			// loop EP2OUT buffer data to EP6IN
+			for( i = 0; i < count; i++ )
+			{
+				EXTAUTODAT2 = EXTAUTODAT1;	// Autopointers make block transfers easy...
+			}
+			EP6BCH = EP2BCH;		// Send the same number of bytes as received  
+			SYNCDELAY;  
+			EP6BCL = EP2BCL;        // arm EP6IN
+			SYNCDELAY;                    
+			EP2BCL = 0x80;          // arm EP2OUT
+#ifdef DEBUG_LEDS
+			IOA ^= 2;
+#endif
+		}
 	}
 }
 
@@ -217,7 +166,7 @@ static void PollControl(void)
 
 void TD_Poll(void)             // Called repeatedly while the device is idle
 {
-	PollCommands();
+	PollBuffers();
 	CheckSendZlp();
 	PollControl();
 }
