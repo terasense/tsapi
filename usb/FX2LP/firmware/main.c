@@ -65,15 +65,9 @@ const char code  EPCS_Offset_Lookup_Table[] =
 // renumerate
 static void reconnect(void)
 {
-#ifdef DEBUG_LEDS
-	IOA = 0xff;
-#endif
 	EZUSB_Discon(TRUE);
 	// Give the host 10 sec to enumerate
 	timer_alarm_update(1000);
-#ifdef DEBUG_LEDS
-	IOA = 0;
-#endif
 }
 
 // Task dispatcher
@@ -86,10 +80,9 @@ void main(void)
 	Reenum  = FALSE;             // Re-enumeration request
 	GotSUD = FALSE;              // Clear "Got setup data" flag
 
-#ifdef DEBUG_LEDS
 	OEA = 0xff;
-	IOA = 0;
-#endif
+	IOA = 0xff;
+
 	// Initialize user device
 	TD_Init();
 

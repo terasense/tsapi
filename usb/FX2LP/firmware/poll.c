@@ -20,7 +20,6 @@
 static BYTE Configuration;             // Current configuration
 static BYTE AlternateSetting;          // Alternate settings
 static BYTE HighSpeed;
-static BYTE NeedZlp; // TBD
 
 // Alarm callback fired when alarm tick counter reach zero. Returns new counter value.
 WORD timer_alarm(void)
@@ -104,7 +103,6 @@ void TD_Init(void)             // Called once at startup
 	timer_init(1000); // 10 sec to alarm
 
 	HighSpeed = FALSE;
-	NeedZlp   = FALSE;
 }
 
 static void PollBuffers(void)
@@ -143,21 +141,6 @@ static void PollBuffers(void)
 	}
 }
 
-static void CheckSendZlp(void)
-{
-	if (EP2468STAT & bmEP6EMPTY)
-	{
-		if (NeedZlp) {
-			NeedZlp = FALSE;
-			// Send zero length packet to flush host buffer
-			EP6BCH = 0;
-			SYNCDELAY;
-			EP6BCL = 0;
-			SYNCDELAY;
-		}
-	}
-}
-
 static void PollControl(void)
 {
 	// Serial State Notification that has to be sent periodically to the host
@@ -180,7 +163,6 @@ static void PollControl(void)
 void TD_Poll(void)             // Called repeatedly while the device is idle
 {
 	PollBuffers();
-	CheckSendZlp();
 	PollControl();
 }
 
@@ -313,6 +295,7 @@ void ISR_Sof(void) interrupt 0
 void ISR_Ures(void) interrupt 0
 {
 	HighSpeed = FALSE;
+	IOA |= 8;
 
 	// whenever we get a USB reset, we should revert to full speed mode
 	pConfigDscr = pFullSpeedConfigDscr;
@@ -336,6 +319,7 @@ void ISR_Highspeed(void) interrupt 0
 	if (EZUSB_HIGHSPEED())
 	{
 		HighSpeed = TRUE;
+		IOA &= ~8;
 
 		pConfigDscr = pHighSpeedConfigDscr;
 		((CONFIGDSCR xdata *) pConfigDscr)->type = CONFIG_DSCR;
