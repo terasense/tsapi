@@ -74,7 +74,7 @@ void TD_Init(void)             // Called once at startup
 	SYNCDELAY;                    
 	EP4CFG = 0x7F;       // Invalid EP
 	SYNCDELAY;                    
-	EP6CFG = 0xE2;
+	EP6CFG = 0xE3;
 	SYNCDELAY;                    
 	EP8CFG = 0x7F;       // Invalid EP
 
