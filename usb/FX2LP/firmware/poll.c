@@ -88,6 +88,11 @@ void TD_Init(void)             // Called once at startup
 
 #ifndef TEST_LOOPBACK
 	EP6FIFOCFG = 8 + 4 + 1; // AUTOIN ZEROLENIN WORDWIDE
+
+	IFCONFIG = 0xCB;
+	// this defines the external interface as follows:
+	// use internal IFCLK (48MHz)
+	// use slave FIFO interface pins asynchronously to external master
 #endif
 
 	Rwuen = TRUE;                 // Enable remote-wakeup
@@ -104,13 +109,13 @@ void TD_Init(void)             // Called once at startup
 
 static void PollBuffers(void)
 {
-	WORD i, count;
-
 	if(!(EP2468STAT & bmEP2EMPTY))		// Is EP2-OUT buffer not empty (has at least one packet)?
 	{
 #ifdef TEST_LOOPBACK
 		if(!(EP2468STAT & bmEP6FULL))	// YES: Is EP6-IN buffer not full (room for at least 1 pkt)?
-		{ 
+		{
+			WORD i, count;
+
 			APTR1H = MSB( &EP2FIFOBUF );
 			APTR1L = LSB( &EP2FIFOBUF );
 			AUTOPTRH2 = MSB( &EP6FIFOBUF );
