@@ -74,7 +74,7 @@ void TD_Init(void)             // Called once at startup
 	SYNCDELAY;                    
 	EP4CFG = 0x7F;       // Invalid EP
 	SYNCDELAY;                    
-	EP6CFG = 0xE3;
+	EP6CFG = 0xE3;       // Triple buffer IN EP
 	SYNCDELAY;                    
 	EP8CFG = 0x7F;       // Invalid EP
 
@@ -85,6 +85,10 @@ void TD_Init(void)             // Called once at startup
 	EP2BCL = 0x80;                // arm EP2OUT by writing byte count w/skip.
 	SYNCDELAY;                    
 	EP2BCL = 0x80;
+
+#ifndef TEST_LOOPBACK
+	EP6FIFOCFG = 8 + 4 + 1; // AUTOIN ZEROLENIN WORDWIDE
+#endif
 
 	Rwuen = TRUE;                 // Enable remote-wakeup
 
@@ -104,6 +108,7 @@ static void PollBuffers(void)
 
 	if(!(EP2468STAT & bmEP2EMPTY))		// Is EP2-OUT buffer not empty (has at least one packet)?
 	{
+#ifdef TEST_LOOPBACK
 		if(!(EP2468STAT & bmEP6FULL))	// YES: Is EP6-IN buffer not full (room for at least 1 pkt)?
 		{ 
 			APTR1H = MSB( &EP2FIFOBUF );
@@ -122,6 +127,9 @@ static void PollBuffers(void)
 			SYNCDELAY;  
 			EP6BCL = EP2BCL;        // arm EP6IN
 			SYNCDELAY;                    
+#else
+		{
+#endif
 			EP2BCL = 0x80;          // arm EP2OUT
 #ifdef DEBUG_LEDS
 			IOA ^= 2;

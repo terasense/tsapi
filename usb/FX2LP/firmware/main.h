@@ -39,6 +39,7 @@ Offset Field       Size Value   Description
 // 2400 baud, no parity, 1 stop bit
 #define DEF_LINE_CODING {0x60,0x09,0x00,0x00,0x00,0x00,0x08}
 
+//#define TEST_LOOPBACK
 #define DEBUG_LEDS
 
 #endif
