@@ -135,7 +135,7 @@ static void PollBuffers(void)
 #endif
 			EP2BCL = 0x80;          // arm EP2OUT
 #ifdef DEBUG_LEDS
-			IOA ^= 2;
+			IOA ^= PA1_LED;
 #endif
 		}
 	}
@@ -285,7 +285,7 @@ void ISR_Sof(void) interrupt 0
 
 #ifdef DEBUG_LEDS
 	if (!sof_cnt++)
-		IOA ^= 1;
+		IOA ^= PA0_LED;
 #endif
 	if (FNADDR != 0) {
 		timer_alarm_update(10);
@@ -295,7 +295,7 @@ void ISR_Sof(void) interrupt 0
 void ISR_Ures(void) interrupt 0
 {
 	HighSpeed = FALSE;
-	IOA |= 8;
+	IOA |= PA7_nHS;
 
 	// whenever we get a USB reset, we should revert to full speed mode
 	pConfigDscr = pFullSpeedConfigDscr;
@@ -319,7 +319,7 @@ void ISR_Highspeed(void) interrupt 0
 	if (EZUSB_HIGHSPEED())
 	{
 		HighSpeed = TRUE;
-		IOA &= ~8;
+		IOA &= ~PA7_nHS;
 
 		pConfigDscr = pHighSpeedConfigDscr;
 		((CONFIGDSCR xdata *) pConfigDscr)->type = CONFIG_DSCR;

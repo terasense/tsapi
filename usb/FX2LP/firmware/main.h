@@ -42,4 +42,14 @@ Offset Field       Size Value   Description
 //#define TEST_LOOPBACK
 #define DEBUG_LEDS
 
+#define PA0_LED      1
+#define PA1_LED      2
+#define PA2_SLOE     4
+#define PA3_WU2      8
+#define PA4_FIFOADR0 16
+#define PA5_FIFOADR1 32
+#define PA6_PKTEND   64
+#define PA7_nHS      128
+
+
 #endif
