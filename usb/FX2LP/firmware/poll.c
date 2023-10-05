@@ -87,6 +87,14 @@ void TD_Init(void)             // Called once at startup
 
 #ifndef TEST_LOOPBACK
 	EP6FIFOCFG = 8 + 4 + 1; // AUTOIN ZEROLENIN WORDWIDE
+#define PKST0 0x08
+#define PKST1 0x10
+#define PKST2 0x20
+#define PFC8  1
+	// PF is high when FIFO has at most 3 committed packets and 256 + 128 bytes (PFC8 + EP6FIFOPFL)
+	// uncommitted so we can safely write yet another 128 bytes
+	EP6FIFOPFH = PKST0 + PKST1 + PKST2 + PFC8;
+	EP6FIFOPFL = 0x80;
 
 	IFCONFIG = 0xCB;
 	// this defines the external interface as follows:
