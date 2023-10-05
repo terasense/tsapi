@@ -73,7 +73,7 @@ void TD_Init(void)             // Called once at startup
 	SYNCDELAY;                    
 	EP4CFG = 0x7F;       // Invalid EP
 	SYNCDELAY;                    
-	EP6CFG = 0xE3;       // Triple buffer IN EP
+	EP6CFG = 0xE0;       // Quad buffer IN EP
 	SYNCDELAY;                    
 	EP8CFG = 0x7F;       // Invalid EP
 
