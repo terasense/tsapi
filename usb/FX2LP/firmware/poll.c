@@ -105,6 +105,23 @@ void TD_Init(void)             // Called once at startup
 	HighSpeed = FALSE;
 }
 
+#ifndef TEST_LOOPBACK
+static void SetStatus(BYTE status)
+{
+		if (status & STA_FLUSH) {
+			IOA &= ~PA6_PKTEND;
+#ifdef DEBUG_LEDS
+			IOA &= ~PA1_LED;
+#endif
+		} else {
+			IOA |= PA6_PKTEND;
+#ifdef DEBUG_LEDS
+			IOA |= PA1_LED;
+#endif
+		}
+}
+#endif
+
 static void PollBuffers(void)
 {
 	if(!(EP2468STAT & bmEP2EMPTY))		// Is EP2-OUT buffer not empty (has at least one packet)?
@@ -112,14 +129,13 @@ static void PollBuffers(void)
 #ifdef TEST_LOOPBACK
 		if(!(EP2468STAT & bmEP6FULL))	// YES: Is EP6-IN buffer not full (room for at least 1 pkt)?
 		{
-			WORD i, count;
+			WORD i;
+			WORD const count = (EP2BCH << 8) + EP2BCL;
 
 			APTR1H = MSB( &EP2FIFOBUF );
 			APTR1L = LSB( &EP2FIFOBUF );
 			AUTOPTRH2 = MSB( &EP6FIFOBUF );
 			AUTOPTRL2 = LSB( &EP6FIFOBUF );
-
-			count = (EP2BCH << 8) + EP2BCL;
 
 			// loop EP2OUT buffer data to EP6IN
 			for( i = 0; i < count; i++ )
@@ -130,13 +146,23 @@ static void PollBuffers(void)
 			SYNCDELAY;  
 			EP6BCL = EP2BCL;        // arm EP6IN
 			SYNCDELAY;                    
-#else
-		{
-#endif
-			EP2BCL = 0x80;          // arm EP2OUT
 #ifdef DEBUG_LEDS
 			IOA ^= PA1_LED;
 #endif
+#else
+		{
+			WORD i;
+			WORD const count = (EP2BCH << 8) + EP2BCL;
+
+			APTR1H = MSB( &EP2FIFOBUF );
+			APTR1L = LSB( &EP2FIFOBUF );
+
+			for( i = 0; i < count; i++ )
+			{
+				SetStatus(EXTAUTODAT1);
+			}
+#endif
+			EP2BCL = 0x80;          // arm EP2OUT
 		}
 	}
 }

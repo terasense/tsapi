@@ -80,8 +80,8 @@ void main(void)
 	Reenum  = FALSE;             // Re-enumeration request
 	GotSUD = FALSE;              // Clear "Got setup data" flag
 
-	OEA = PA0_LED | PA1_LED | PA2_SLOE | PA4_FIFOADR0 | PA5_FIFOADR1 | PA7_nHS;
-	IOA = PA0_LED | PA1_LED | PA2_SLOE | PA5_FIFOADR1 | PA7_nHS;
+	OEA = PA0_LED | PA1_LED | PA2_SLOE | PA4_FIFOADR0 | PA5_FIFOADR1 | PA6_PKTEND | PA7_nHS;
+	IOA = PA0_LED | PA1_LED | PA2_SLOE | PA5_FIFOADR1 | PA6_PKTEND | PA7_nHS;
 
 	// Initialize user device
 	TD_Init();

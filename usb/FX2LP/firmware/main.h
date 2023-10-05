@@ -51,5 +51,6 @@ Offset Field       Size Value   Description
 #define PA6_PKTEND   64
 #define PA7_nHS      128
 
+#define STA_FLUSH  1
 
 #endif
