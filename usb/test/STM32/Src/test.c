@@ -22,7 +22,6 @@ static void set_idle(bool flag)
 
 void test_init(void)
 {
-	set_idle(false);
 }
 
 static void tx_start(uint8_t len)
