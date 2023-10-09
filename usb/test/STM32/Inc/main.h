@@ -67,7 +67,7 @@ void Error_Handler(void);
 #define nLED_Pin GPIO_PIN_0
 #define nLED_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
-
+extern SPI_HandleTypeDef hspi1;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
