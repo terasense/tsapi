@@ -44,12 +44,7 @@ Offset Field       Size Value   Description
 
 #define PA0_LED      1
 #define PA1_LED      2
-#define PA2_SLOE     4
-#define PA3_WU2      8
-#define PA4_FIFOADR0 16
-#define PA5_FIFOADR1 32
-#define PA6_PKTEND   64
-#define PA7_nHS      128
+#define PA1_nHS      PA1_LED
 
 #define STA_FLUSH  1
 

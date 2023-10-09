@@ -38,8 +38,18 @@ void TD_Init(void)             // Called once at startup
 	// set the CPU clock to 48MHz
 	CPUCS = ((CPUCS & ~bmCLKSPD) | bmCLKSPD1) ;
 
-	// set the slave FIFO interface to 48MHz
-	IFCONFIG |= 0x40;
+	OEA = PA0_LED | PA1_LED;
+	IOA = PA0_LED | PA1_LED;
+
+	// defines the external interface as follows:
+	// use internal IFCLK (48MHz)
+	// use slave FIFO interface pins asynchronously to external master
+
+	IFCONFIG = 0x80 + 0x40 + 0x8 + 3; // Internal 48MHz clock async slave FIFO
+	
+#ifndef TEST_LOOPBACK
+	SYNCDELAY; REVCTL = 3;
+#endif
 
 	// Registers which require a synchronization delay, see section 15.14
 	// FIFORESET        FIFOPINPOLAR
@@ -65,41 +75,41 @@ void TD_Init(void)             // Called once at startup
 	// default: EP2, EP4, EP6, and EP8 are double buffered
 
 	// we are just using the default values, yes this is not necessary...
-	EP1OUTCFG = 0xA0;
-	SYNCDELAY;           // see TRM section 15.14
-	EP1INCFG = 0xB0;     // Configure EP1IN as BULK IN EP
-	SYNCDELAY;
-	EP2CFG = 0xA2;
-	SYNCDELAY;                    
-	EP4CFG = 0x7F;       // Invalid EP
-	SYNCDELAY;                    
-	EP6CFG = 0xE0;       // Quad buffer IN EP
-	SYNCDELAY;                    
-	EP8CFG = 0x7F;       // Invalid EP
+	SYNCDELAY; EP1OUTCFG = 0xA0;
+	SYNCDELAY; EP1INCFG = 0xB0;     // Configure EP1IN as BULK IN EP
+	SYNCDELAY; EP2CFG = 0xA2;       // Double buffer OUT EP
+	SYNCDELAY; EP4CFG &= 0x7F;      // Invalid EP
+	SYNCDELAY; EP6CFG = 0xE0;       // Quad buffer IN EP
+	SYNCDELAY; EP8CFG &= 0x7F;      // Invalid EP
 
 	// out endpoints do not come up armed
-
 	// since the defaults are double buffered we must write dummy byte counts (setting SKIP bit) twice
-	SYNCDELAY;                    
-	EP2BCL = 0x80;                // arm EP2OUT by writing byte count w/skip.
-	SYNCDELAY;                    
-	EP2BCL = 0x80;
+	SYNCDELAY; EP2BCL = 0x80;                // arm EP2OUT by writing byte count w/skip.
+	SYNCDELAY; EP2BCL = 0x80;
 
 #ifndef TEST_LOOPBACK
-	EP6FIFOCFG = 8 + 4 + 1; // AUTOIN ZEROLENIN WORDWIDE
+	SYNCDELAY; EP6FIFOCFG = 4 + 1; // ZEROLENIN WORDWIDE
+
+	// Reset the FIFO
+	SYNCDELAY; FIFORESET = 0x80;
+	SYNCDELAY; FIFORESET = 0x82;
+	SYNCDELAY; FIFORESET = 0x86;
+	SYNCDELAY; FIFORESET = 0x00;
+
+	SYNCDELAY; EP6FIFOCFG |= 8; // AUTOIN
+	SYNCDELAY; EP6AUTOINLENH = 0x02; // Auto-commit 512-byte packets
+	SYNCDELAY; EP6AUTOINLENL = 0x00;
 #define PKST0 0x08
 #define PKST1 0x10
 #define PKST2 0x20
 #define PFC8  1
-	// PF is high when FIFO has at most 3 committed packets and 256 + 128 bytes (PFC8 + EP6FIFOPFL)
-	// uncommitted so we can safely write yet another 128 bytes
-	EP6FIFOPFH = PKST0 + PKST1 + PKST2 + PFC8;
-	EP6FIFOPFL = 0x80;
+	// PF is high when FIFO has at most 3 committed packets and 256 (PFC8)
+	// uncommitted so we can safely write yet another 256 bytes
+	SYNCDELAY; EP6FIFOPFH = PKST0 + PKST1 + PKST2 + PFC8;
+	SYNCDELAY; EP6FIFOPFL = 0;
 
-	IFCONFIG = 0xCB;
-	// this defines the external interface as follows:
-	// use internal IFCLK (48MHz)
-	// use slave FIFO interface pins asynchronously to external master
+	SYNCDELAY; PINFLAGSAB = 0xe6;
+	SYNCDELAY; PINFLAGSCD = 0x0a;
 #endif
 
 	Rwuen = TRUE;                 // Enable remote-wakeup
@@ -112,23 +122,6 @@ void TD_Init(void)             // Called once at startup
 
 	HighSpeed = FALSE;
 }
-
-#ifndef TEST_LOOPBACK
-static void SetStatus(BYTE status)
-{
-		if (status & STA_FLUSH) {
-			IOA &= ~PA6_PKTEND;
-#ifdef DEBUG_LEDS
-			IOA &= ~PA1_LED;
-#endif
-		} else {
-			IOA |= PA6_PKTEND;
-#ifdef DEBUG_LEDS
-			IOA |= PA1_LED;
-#endif
-		}
-}
-#endif
 
 static void PollBuffers(void)
 {
@@ -159,16 +152,6 @@ static void PollBuffers(void)
 #endif
 #else
 		{
-			WORD i;
-			WORD const count = (EP2BCH << 8) + EP2BCL;
-
-			APTR1H = MSB( &EP2FIFOBUF );
-			APTR1L = LSB( &EP2FIFOBUF );
-
-			for( i = 0; i < count; i++ )
-			{
-				SetStatus(EXTAUTODAT1);
-			}
 #endif
 			EP2BCL = 0x80;          // arm EP2OUT
 		}
@@ -329,8 +312,9 @@ void ISR_Sof(void) interrupt 0
 void ISR_Ures(void) interrupt 0
 {
 	HighSpeed = FALSE;
-	IOA |= PA7_nHS;
-
+#ifndef TEST_LOOPBACK
+	IOA |= PA1_nHS;
+#endif
 	// whenever we get a USB reset, we should revert to full speed mode
 	pConfigDscr = pFullSpeedConfigDscr;
 	((CONFIGDSCR xdata *) pConfigDscr)->type = CONFIG_DSCR;
@@ -353,8 +337,9 @@ void ISR_Highspeed(void) interrupt 0
 	if (EZUSB_HIGHSPEED())
 	{
 		HighSpeed = TRUE;
-		IOA &= ~PA7_nHS;
-
+#ifndef TEST_LOOPBACK
+		IOA &= ~PA1_nHS;
+#endif
 		pConfigDscr = pHighSpeedConfigDscr;
 		((CONFIGDSCR xdata *) pConfigDscr)->type = CONFIG_DSCR;
 		pOtherConfigDscr = pFullSpeedConfigDscr;
