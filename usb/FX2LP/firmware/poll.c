@@ -53,10 +53,6 @@ void TD_Init(void)             // Called once at startup
 #define FIFO_SLAVE 3
 	IFCONFIG = CLK_INT + CLK_48MHz + FIFO_ASYNC + FIFO_SLAVE;
 
-#ifndef TEST_LOOPBACK
-	SYNCDELAY; REVCTL = 3;
-#endif
-
 	// Registers which require a synchronization delay, see section 15.14
 	// FIFORESET        FIFOPINPOLAR
 	// INPKTEND         OUTPKTEND
