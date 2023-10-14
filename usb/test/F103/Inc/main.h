@@ -67,7 +67,7 @@ void Error_Handler(void);
 #define nHS_Pin GPIO_PIN_6
 #define nHS_GPIO_Port GPIOA
 /* USER CODE BEGIN Private defines */
-
+extern SPI_HandleTypeDef hspi1;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
