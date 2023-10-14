@@ -38,15 +38,15 @@ void TD_Init(void)             // Called once at startup
 	// set the CPU clock to 48MHz
 	CPUCS = ((CPUCS & ~bmCLKSPD) | bmCLKSPD1) ;
 
-	OEA = PA0_LED | PA1_LED;
-	IOA = PA0_LED | PA1_LED;
+	OEA = PA0_LED | PA1_LED | PA2_nSLOE | PA4_FIFOADDR0 | PA5_FIFOADDR1;
+	IOA = PA0_LED | PA1_LED | PA2_nSLOE | PA5_FIFOADDR1;
 
 	// defines the external interface as follows:
 	// use internal IFCLK (48MHz)
 	// use slave FIFO interface pins asynchronously to external master
 
-	IFCONFIG = 0x80 + 0x40 + 0x8 + 3; // Internal 48MHz clock async slave FIFO
-	
+	IFCONFIG = 0x80 + 0x40 + 8 + 3; // Internal 48MHz clock async slave FIFO
+
 #ifndef TEST_LOOPBACK
 	SYNCDELAY; REVCTL = 3;
 #endif
@@ -101,15 +101,11 @@ void TD_Init(void)             // Called once at startup
 	SYNCDELAY; EP6AUTOINLENL = 0x00;
 #define PKST0 0x08
 #define PKST1 0x10
-#define PKST2 0x20
 #define PFC8  1
 	// PF is high when FIFO has at most 3 committed packets and 256 (PFC8)
 	// uncommitted so we can safely write yet another 256 bytes
-	SYNCDELAY; EP6FIFOPFH = PKST0 + PKST1 + PKST2 + PFC8;
+	SYNCDELAY; EP6FIFOPFH = PKST0 + PKST1 + PFC8;
 	SYNCDELAY; EP6FIFOPFL = 0;
-
-	SYNCDELAY; PINFLAGSAB = 0xe6;
-	SYNCDELAY; PINFLAGSCD = 0x0a;
 #endif
 
 	Rwuen = TRUE;                 // Enable remote-wakeup
