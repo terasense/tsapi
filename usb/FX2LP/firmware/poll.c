@@ -44,8 +44,14 @@ void TD_Init(void)             // Called once at startup
 	// defines the external interface as follows:
 	// use internal IFCLK (48MHz)
 	// use slave FIFO interface pins asynchronously to external master
-
-	IFCONFIG = 0x80 + 0x40 + 8 + 3; // Internal 48MHz clock async slave FIFO
+#define CLK_INT   0x80
+#define CLK_48MHz 0x40
+#define CLK_OE    0x20
+#define CLK_INV   0x10
+#define FIFO_ASYNC 8
+#define FIFO_GPIF  2
+#define FIFO_SLAVE 3
+	IFCONFIG = CLK_INT + CLK_48MHz + FIFO_ASYNC + FIFO_SLAVE;
 
 #ifndef TEST_LOOPBACK
 	SYNCDELAY; REVCTL = 3;
