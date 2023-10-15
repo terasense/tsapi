@@ -121,7 +121,7 @@ void TD_Init(void)             // Called once at startup
 	HighSpeed = FALSE;
 }
 
-static void PollBuffers(void)
+void TD_Poll(void)   // Called repeatedly while the device is idle
 {
 	if(!(EP2468STAT & bmEP2EMPTY))		// Is EP2-OUT buffer not empty (has at least one packet)?
 	{
@@ -154,31 +154,6 @@ static void PollBuffers(void)
 			EP2BCL = 0x80;          // arm EP2OUT
 		}
 	}
-}
-
-static void PollControl(void)
-{
-	// Serial State Notification that has to be sent periodically to the host
-	if (!(EP1INCS & 0x02))      // check if EP1IN is available
-	{
-		EP1INBUF[0] = 0x0A;       // if it is available, then fill the first 10 bytes of the buffer with 
-		EP1INBUF[1] = 0x20;       // appropriate data. 
-		EP1INBUF[2] = 0x00;
-		EP1INBUF[3] = 0x00;
-		EP1INBUF[4] = 0x00;
-		EP1INBUF[5] = 0x00;
-		EP1INBUF[6] = 0x00;
-		EP1INBUF[7] = 0x02;
-		EP1INBUF[8] = 0x00;
-		EP1INBUF[9] = 0x00;
-		EP1INBC = 10;            // manually commit once the buffer is filled
-	}
-}
-
-void TD_Poll(void)             // Called repeatedly while the device is idle
-{
-	PollBuffers();
-	PollControl();
 }
 
 BOOL TD_Suspend(void)          // Called before the device goes into suspend mode
