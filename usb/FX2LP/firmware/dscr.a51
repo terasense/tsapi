@@ -121,7 +121,7 @@ HighSpeedConfigDscr:
       db   ET_INT                                     		;; Endpoint type
       db   10H                                                  ;; Maximum packet size (LSB)
       db   00H                                                  ;; Max packet size (MSB)
-      db   80H                                                  ;; Polling interval
+      db   0bH                                                  ;; Polling interval
               
 ;; Virtual COM Port Data Interface Descriptor
       db   DSCR_INTRFC_LEN                            		;; Descriptor length
