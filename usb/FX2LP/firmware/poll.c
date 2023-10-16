@@ -41,6 +41,7 @@ void TD_Init(void)             // Called once at startup
 	OEA = PA0_LED | PA1_LED | PA2_nSLOE | PA4_FIFOADDR0 | PA5_FIFOADDR1;
 	IOA = PA0_LED | PA1_LED | PA2_nSLOE | PA5_FIFOADDR1;
 
+#ifndef TEST_LOOPBACK
 	// defines the external interface as follows:
 	// use internal IFCLK (48MHz)
 	// use slave FIFO interface pins asynchronously to external master
@@ -52,7 +53,7 @@ void TD_Init(void)             // Called once at startup
 #define FIFO_GPIF  2
 #define FIFO_SLAVE 3
 	IFCONFIG = CLK_INT + CLK_48MHz + FIFO_ASYNC + FIFO_SLAVE;
-
+#endif
 	// Registers which require a synchronization delay, see section 15.14
 	// FIFORESET        FIFOPINPOLAR
 	// INPKTEND         OUTPKTEND
