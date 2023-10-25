@@ -36,7 +36,7 @@ WORD timer_alarm(void)
 void TD_Init(void)             // Called once at startup
 {
 	// set the CPU clock to 48MHz
-	CPUCS = ((CPUCS & ~bmCLKSPD) | bmCLKSPD1) ;
+	CPUCS = ((CPUCS & ~bmCLKSPD) | bmCLKSPD1) & ~bmCLKOE;
 
 	OEA = PA0_LED | PA1_LED | PA2_nSLOE | PA4_FIFOADDR0 | PA5_FIFOADDR1;
 	IOA = PA0_LED | PA1_LED | PA2_nSLOE | PA5_FIFOADDR1;
