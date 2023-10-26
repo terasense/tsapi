@@ -1073,6 +1073,18 @@
         <name>$PROJ_DIR$\..\Src\cli.c</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\Src\cli_parse.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\Src\reboot_loader.s</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\Src\scpi.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\Src\system.c</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\Src\test.c</name>
       </file>
       <file>
@@ -1155,6 +1167,9 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_exti.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_iwdg.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_spi.c</name>

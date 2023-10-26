@@ -3,7 +3,7 @@ import serial
 import time
 
 last_sn = None
-abort_on_error = True
+abort_on_error = False
 
 def validate_sn(sn):
 	global last_sn

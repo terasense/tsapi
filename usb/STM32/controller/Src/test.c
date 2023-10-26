@@ -58,7 +58,3 @@ void test_run(void)
 	set_idle(false);
 	tx_start(TX_BURST);
 }
-
-void test_idle(void)
-{
-}
