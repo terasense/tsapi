@@ -1,2 +1,2 @@
 # tsapi
-TeraSense devices API and example code
+TeraSense SmartVision devices API and example code
