@@ -50,6 +50,8 @@ extern "C" {
 
 /* USER CODE END EM */
 
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
@@ -58,12 +60,44 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define nFULL_Pin GPIO_PIN_1
-#define nFULL_GPIO_Port GPIOA
-#define nAFULL_Pin GPIO_PIN_3
-#define nAFULL_GPIO_Port GPIOA
-#define nHS_Pin GPIO_PIN_5
+#define ID0_Pin GPIO_PIN_13
+#define ID0_GPIO_Port GPIOC
+#define ID1_Pin GPIO_PIN_14
+#define ID1_GPIO_Port GPIOC
+#define ID2_Pin GPIO_PIN_15
+#define ID2_GPIO_Port GPIOC
+#define ADC_RST_Pin GPIO_PIN_1
+#define ADC_RST_GPIO_Port GPIOA
+#define ADC_nFS_Pin GPIO_PIN_2
+#define ADC_nFS_GPIO_Port GPIOA
+#define ADC_CONVST_Pin GPIO_PIN_6
+#define ADC_CONVST_GPIO_Port GPIOA
+#define nHS_Pin GPIO_PIN_4
 #define nHS_GPIO_Port GPIOC
+#define nAFULL_Pin GPIO_PIN_5
+#define nAFULL_GPIO_Port GPIOC
+#define nFULL_Pin GPIO_PIN_0
+#define nFULL_GPIO_Port GPIOB
+#define FX_nRST_Pin GPIO_PIN_1
+#define FX_nRST_GPIO_Port GPIOB
+#define FX_WIDE_Pin GPIO_PIN_2
+#define FX_WIDE_GPIO_Port GPIOB
+#define EPM_nCS_Pin GPIO_PIN_12
+#define EPM_nCS_GPIO_Port GPIOB
+#define DISPL_CS_Pin GPIO_PIN_6
+#define DISPL_CS_GPIO_Port GPIOC
+#define DISPL_DC_Pin GPIO_PIN_7
+#define DISPL_DC_GPIO_Port GPIOC
+#define DISPL_RST_Pin GPIO_PIN_8
+#define DISPL_RST_GPIO_Port GPIOC
+#define GPIO0_Pin GPIO_PIN_9
+#define GPIO0_GPIO_Port GPIOA
+#define GPIO1_Pin GPIO_PIN_10
+#define GPIO1_GPIO_Port GPIOA
+#define LED_GREEN_Pin GPIO_PIN_4
+#define LED_GREEN_GPIO_Port GPIOB
+#define LED_RED_Pin GPIO_PIN_5
+#define LED_RED_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 extern SPI_HandleTypeDef hspi1;
 /* USER CODE END Private defines */
