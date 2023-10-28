@@ -21,6 +21,9 @@ static void set_idle(bool flag)
 
 void test_init(void)
 {
+	WRITE_PIN(ADC_RST, 1);
+	HAL_Delay(10);
+	WRITE_PIN(ADC_RST, 0);
 }
 
 static void tx_start(uint8_t len)
