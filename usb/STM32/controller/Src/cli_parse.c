@@ -1,5 +1,6 @@
 #include "cli.h"
 #include "cli_parse.h"
+#include "i2c_eeprom.h"
 #include "system.h"
 #include "scpi.h"
 #include "uuid.h"
@@ -120,6 +121,12 @@ static const struct scpi_node fx2_nodes[] = {
 		fx2_reset_handler,
 		"(0|1) clear|assert FX2 reset input. RESet? returns its current state."
 	},
+	{
+		"EEPRom",
+		i2c_eeprom_nodes,
+		NULL,
+		" provides access to EEPROM attached to FX2 by means of the following tags:"
+	},
 	SCPI_NODE_END
 };
 
@@ -138,7 +145,9 @@ static const struct scpi_node system_nodes[] = {
 	},
 	{
 		"FX2",
-		fx2_nodes
+		fx2_nodes,
+		NULL,
+		" provides access to the Cypress FX2 USB Peripheral Controller by means of the following tags:"
 	},
 	SCPI_NODE_END
 };

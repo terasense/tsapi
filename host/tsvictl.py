@@ -272,6 +272,34 @@ def do_version(args):
 		print (dev.send_command(b'SYST:VERS?').decode())
 	return 0
 
+def fx2_prog(dev, f):
+	addr = 0
+	pg_sz = 64
+	dev.send_command(b':SYST:FX2:RES1')
+	try:
+		while True:
+			pg = f.read(pg_sz)
+			if not pg:
+				if not addr:
+					print ('the firmware file is empty', file=sys.stderr)
+					return 255
+				break
+			if not addr:
+				if pg[0] != 0xc2:
+					print ('the firmware file is invalid', file=sys.stderr)
+					return 255
+			dev.send_command((b':SYST:FX2:EEPR:WR %u ' % addr) + b' '.join((b'%u' % b for b in pg)))
+			addr += pg_sz
+		return 0
+	finally:
+		dev.send_command(b':SYST:FX2:RES0')
+
+def do_fx2_prog(args):
+	c = controller()
+	with c.connect_serial(args.port) as dev:
+		with open(args.file, 'rb') as f:
+			return fx2_prog(dev, f)
+
 if __name__ == '__main__':
 	import traceback
 	import argparse
@@ -298,6 +326,10 @@ if __name__ == '__main__':
 	parser_send = subparsers.add_parser('send', help='send command to controller')
 	parser_send.set_defaults(func=do_send)
 	parser_send.add_argument('command', help='command to send')
+
+	parser_send = subparsers.add_parser('fx2-program', help='program firmware for FX2 USB controller')
+	parser_send.set_defaults(func=do_fx2_prog)
+	parser_send.add_argument('file', help='firmware file to program')	
 
 	args = parser.parse_args()
 	try:

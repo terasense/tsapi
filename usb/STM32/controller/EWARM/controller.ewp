@@ -1076,6 +1076,9 @@
         <name>$PROJ_DIR$\..\Src\cli_parse.c</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\Src\i2c_eeprom.c</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\Src\reboot_loader.s</name>
       </file>
       <file>
@@ -1169,22 +1172,22 @@
         <name>$PROJ_DIR$\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_exti.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$/../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.c</name>
+        <name>$PROJ_DIR$\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_adc.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$/../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc_ex.c</name>
+        <name>$PROJ_DIR$\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_adc_ex.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$/../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dac.c</name>
+        <name>$PROJ_DIR$\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_dac.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$/../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dac_ex.c</name>
+        <name>$PROJ_DIR$\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_dac_ex.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$/../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c</name>
+        <name>$PROJ_DIR$\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_i2c.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$/../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c_ex.c</name>
+        <name>$PROJ_DIR$\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_i2c_ex.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_iwdg.c</name>
