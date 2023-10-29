@@ -71,6 +71,28 @@ static int reset_handler(const char* str, unsigned sz, struct scpi_node const* n
 	return 0;
 }
 
+static int fx2_reset_handler(const char* str, unsigned sz, struct scpi_node const* n)
+{
+	if (sz != 1)
+		return -err_param;
+	switch (str[0]) {
+	case '?': {
+		err_t const err = cli_put(READ_PIN(FX_nRST) ? "0" : "1", 1);
+		if (err)
+			return -err;	
+		return sz;
+	}
+	case '0':
+		WRITE_PIN(FX_nRST, 1);
+		return sz;
+	case '1':
+		WRITE_PIN(FX_nRST, 0);
+		return sz;
+	default:
+		return -err_param;
+	}
+}
+
 static const struct scpi_node star_nodes[] = {
 	{
 		"IDN",
@@ -91,6 +113,16 @@ static const struct scpi_node reset_nodes[] = {
 	SCPI_NODE_END
 };
 
+static const struct scpi_node fx2_nodes[] = {
+	{
+		"RESet",
+		NULL,
+		fx2_reset_handler,
+		"(0|1) clear|assert FX2 reset input. RESet? returns its current state."
+	},
+	SCPI_NODE_END
+};
+
 static const struct scpi_node system_nodes[] = {
 	{
 		"VERSion",
@@ -103,6 +135,10 @@ static const struct scpi_node system_nodes[] = {
 		reset_nodes,
 		reset_handler,
 		" performs controller reset. The following tag is optional:"
+	},
+	{
+		"FX2",
+		fx2_nodes
 	},
 	SCPI_NODE_END
 };
