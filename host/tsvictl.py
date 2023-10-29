@@ -239,7 +239,7 @@ def echo_test(dev, echo_len = 0x1000):
 	if nbytes and elapsed:
 		print ('%u messages sent (%u bytes), %u bytes/sec' % (i, nbytes, nbytes / elapsed))
 
-def do_test(args):
+def do_echo_test(args):
 	c = controller()
 	with c.connect_serial(args.port) as dev:
 		print ('Found', dev)
@@ -317,8 +317,8 @@ if __name__ == '__main__':
 	parser_vers = subparsers.add_parser('version', help='retrieve controller firmware version')
 	parser_vers.set_defaults(func=do_version)
 
-	parser_test = subparsers.add_parser('test', help='run echo test')
-	parser_test.set_defaults(func=do_test)
+	parser_test = subparsers.add_parser('echo-test', help='run echo test')
+	parser_test.set_defaults(func=do_echo_test)
 
 	parser_term = subparsers.add_parser('terminal', help='interactive terminal')
 	parser_term.set_defaults(func=do_terminal)
