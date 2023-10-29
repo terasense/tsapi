@@ -111,13 +111,13 @@ static inline unsigned scan_u(const char* buf, unsigned len, uint32_t* val)
 
 static inline bool has_prefix_casei(const char* str, unsigned sz, const char* pref)
 {
-    for (;; ++str, ++pref, --sz) {
-	const char p = *pref;
-	if (!p)
-		return true;
-	if (!sz)
-		return false;
-        if (tolower(*str) != tolower(p))
-		return false;
-    }
+	for (;; ++str, ++pref, --sz) {
+		const char p = *pref;
+		if (!p)
+			return true;
+		if (!sz)
+			return false;
+		if (tolower(*str) != tolower(p))
+			return false;
+	}
 }
