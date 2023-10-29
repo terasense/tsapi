@@ -42,12 +42,9 @@ static inline void rx_reset(void)
 
 static err_t cli_reply(void)
 {
-	if (USBD_OK == CDC_Transmit_FS(tx_buff, tx_sz)) {
-		return err_ok;
-	} else {
-		tx_reset();
-		return err_internal;
-	}
+	uint8_t const rc = CDC_Transmit_FS(tx_buff, tx_sz);
+	tx_reset();
+	return rc == USBD_OK ? err_ok : err_internal;
 }
 
 err_t cli_put(char const* buff, unsigned sz)
@@ -117,13 +114,6 @@ static inline int usb_busy(void)
 	return !hcdc || hcdc->TxState != 0 || (USB_OTG_FS->GRSTCTL & USB_OTG_GRSTCTL_TXFFLSH);
 }
 
-static void usb_send_zlp(void)
-{
-	// The STM libs don't bother sending zero length packets to mark end of
-	// transmission in case the last packet had max allowed size. So do it now.
-	CDC_Transmit_FS(tx_buff, 0); // ZLP
-}
-
 static bool is_receive_completed(void)
 {
 	if (cli_err)
@@ -188,12 +178,6 @@ void cli_run(void)
 	}
 	if (usb_busy()) {
 		// Don't do anything till the previous packet transmission completion
-		return;
-	}
-	if (tx_sz)
-	{
-		usb_send_zlp();
-		tx_reset();
 		return;
 	}
 	// Check we need to reply
