@@ -1,6 +1,6 @@
 #include "stm32f4xx_hal.h"
 #include "system.h"
-#include "cli.h"
+#include "main.h"
 #include "version.h"
 
 #include <string.h>
@@ -21,6 +21,12 @@ void sys_first_init(void)
 	sys_reset_magic = 0;
 	if (magic == LOADER_MAGIC_KEY)
 		Reboot_Loader();
+}
+
+void sys_init(void)
+{
+	WRITE_PIN(ADS_RST, 0);
+	WRITE_PIN(FX_nRST, 1);
 }
 
 void _sys_schedule_bootloader(void)

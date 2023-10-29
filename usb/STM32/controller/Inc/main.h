@@ -60,18 +60,26 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define ID0_Pin GPIO_PIN_13
-#define ID0_GPIO_Port GPIOC
-#define ID1_Pin GPIO_PIN_14
-#define ID1_GPIO_Port GPIOC
-#define ID2_Pin GPIO_PIN_15
-#define ID2_GPIO_Port GPIOC
-#define ADC_RST_Pin GPIO_PIN_1
-#define ADC_RST_GPIO_Port GPIOA
-#define ADC_nFS_Pin GPIO_PIN_2
-#define ADC_nFS_GPIO_Port GPIOA
-#define ADC_CONVST_Pin GPIO_PIN_6
-#define ADC_CONVST_GPIO_Port GPIOA
+#define REV0_Pin GPIO_PIN_13
+#define REV0_GPIO_Port GPIOC
+#define REV1_Pin GPIO_PIN_14
+#define REV1_GPIO_Port GPIOC
+#define REV2_Pin GPIO_PIN_15
+#define REV2_GPIO_Port GPIOC
+#define MOD2_Pin GPIO_PIN_0
+#define MOD2_GPIO_Port GPIOC
+#define MOD3_Pin GPIO_PIN_1
+#define MOD3_GPIO_Port GPIOC
+#define MOD4_Pin GPIO_PIN_2
+#define MOD4_GPIO_Port GPIOC
+#define MOD5_Pin GPIO_PIN_3
+#define MOD5_GPIO_Port GPIOC
+#define ADS_nFS_Pin GPIO_PIN_2
+#define ADS_nFS_GPIO_Port GPIOA
+#define ADS_RST_Pin GPIO_PIN_3
+#define ADS_RST_GPIO_Port GPIOA
+#define ADS_CONVST_Pin GPIO_PIN_6
+#define ADS_CONVST_GPIO_Port GPIOA
 #define nHS_Pin GPIO_PIN_4
 #define nHS_GPIO_Port GPIOC
 #define nAFULL_Pin GPIO_PIN_5
@@ -82,6 +90,10 @@ void Error_Handler(void);
 #define FX_nRST_GPIO_Port GPIOB
 #define FX_WIDE_Pin GPIO_PIN_2
 #define FX_WIDE_GPIO_Port GPIOB
+#define FX_nPKTEND_Pin GPIO_PIN_10
+#define FX_nPKTEND_GPIO_Port GPIOB
+#define RESERVED_TP_Pin GPIO_PIN_11
+#define RESERVED_TP_GPIO_Port GPIOB
 #define EPM_nCS_Pin GPIO_PIN_12
 #define EPM_nCS_GPIO_Port GPIOB
 #define DISPL_CS_Pin GPIO_PIN_6
@@ -94,10 +106,26 @@ void Error_Handler(void);
 #define GPIO0_GPIO_Port GPIOA
 #define GPIO1_Pin GPIO_PIN_10
 #define GPIO1_GPIO_Port GPIOA
+#define FSYNC2_Pin GPIO_PIN_15
+#define FSYNC2_GPIO_Port GPIOA
+#define GPIO2_Pin GPIO_PIN_10
+#define GPIO2_GPIO_Port GPIOC
+#define GPIO3_Pin GPIO_PIN_11
+#define GPIO3_GPIO_Port GPIOC
+#define GPIO4_Pin GPIO_PIN_12
+#define GPIO4_GPIO_Port GPIOC
+#define GPIO5_Pin GPIO_PIN_2
+#define GPIO5_GPIO_Port GPIOD
+#define GPO6_Pin GPIO_PIN_3
+#define GPO6_GPIO_Port GPIOB
 #define LED_GREEN_Pin GPIO_PIN_4
 #define LED_GREEN_GPIO_Port GPIOB
 #define LED_RED_Pin GPIO_PIN_5
 #define LED_RED_GPIO_Port GPIOB
+#define MOD0_Pin GPIO_PIN_8
+#define MOD0_GPIO_Port GPIOB
+#define MOD1_Pin GPIO_PIN_9
+#define MOD1_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 extern SPI_HandleTypeDef hspi1;
 /* USER CODE END Private defines */
