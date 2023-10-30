@@ -16,8 +16,6 @@
 #define START_TAG1 0x3ad6
 
 static uint16_t next_sn;
-static uint16_t received_sn;
-static uint16_t window_sz = 0x800; // 2k * 32 = 64kbyte
 static uint16_t tx_buff[TX_BURST];
 
 static bool test_active   = false;
@@ -32,12 +30,12 @@ static void set_idle(bool flag)
 static void test_start(void)
 {
 	test_active = start_request = true;
-	next_sn = received_sn = 0;
+	next_sn = 0;
 }
 
 static void test_stop(void)
 {
-	// TDB
+	test_active = false;
 }
 
 void test_init(void)
@@ -56,12 +54,6 @@ static void transmit_start(void)
 	HAL_SPI_Transmit_DMA(&hSPI, (uint8_t*)tx_buff, 2);
 }
 
-static inline bool has_wnd_space(uint8_t len)
-{
-	uint16_t const end = next_sn + len;
-	return (end - received_sn) <= window_sz;
-}
-
 static void transmit_next(uint8_t len)
 {
 	for (uint8_t i = 0; i < len; ++i)
@@ -71,14 +63,14 @@ static void transmit_next(uint8_t len)
 
 void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
 {
-	if (start_request) {
+	if (!test_active) {
+		// stop pending
+		set_idle(true);
+	} else if (start_request) {
 		// restart pending
 		set_idle(true);
 	} else if (READ_PIN(FX_nHS)) {
 		// not in HS mode
-		set_idle(true);
-	} else if (!has_wnd_space(TX_BURST)) {
-		// receiver buffer congestion
 		set_idle(true);
 	} else if (READ_PIN(FX_nAFULL)) {
 		// has room for the full burst
@@ -100,8 +92,6 @@ void test_run(void)
 		return;
 	if (!READ_PIN(FX_nAFULL))
 		return;
-	if (!has_wnd_space(TX_BURST))
-		return;
 
 	set_idle(false);
 	if (start_request) {
@@ -114,10 +104,9 @@ void test_run(void)
 static const char* test_state(void)
 {
 	if (!test_active)
-		return "STOPPED";
-	if (is_idle)
-		return "PAUSED";
-	return "RUNNING";
+		return is_idle ? "STOPPED" : "STOPPING";
+	else
+		return is_idle ? "PAUSED" : "RUNNING";
 }
 
 static int test_state_handler(const char* str, unsigned sz, struct scpi_node const* n)
@@ -148,49 +137,12 @@ static int test_state_handler(const char* str, unsigned sz, struct scpi_node con
 	return -err_cmd;
 }
 
-const struct scpi_node test_tx_nodes[] = {
-	{
-		"POSition",
-		NULL,
-		scpi_u16_r_handler,
-		"? returns the current transmit stream position.",
-		.param = &next_sn
-	},
-	{
-		"WINDow",
-		NULL,
-		scpi_u16_rw_handler,
-		" N sets transmit window to N. WINDow? returns the current value.",
-		.param = &window_sz
-	},
-	SCPI_NODE_END
-};
-
-const struct scpi_node test_rx_nodes[] = {
-	{
-		"POSition",
-		NULL,
-		scpi_u16_w_handler,
-		" N sets the stream position received by the host.",
-		.param = &received_sn
-	},
-	SCPI_NODE_END
-};
-
 const struct scpi_node test_fifo_nodes[] = {
 	{
 		"STATe",
 		NULL,
 		test_state_handler,
 		" (RUN|STOP) starts|stops FX2 FIFO test. STATe? returns its current state."
-	},
-	{
-		"TRANsmit",
-		test_tx_nodes,
-	},
-	{
-		"RECeive",
-		test_rx_nodes,
 	},
 	SCPI_NODE_END
 };
