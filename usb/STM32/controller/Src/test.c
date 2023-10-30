@@ -32,15 +32,15 @@ static void tx_start(uint8_t len)
 
 void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
 {
-	if (READ_PIN(nHS)) {
+	if (READ_PIN(FX_nHS)) {
 		// not in HS mode
 		set_idle(true);
-	} else if (READ_PIN(nAFULL)) {
+	} else if (READ_PIN(FX_nAFULL)) {
 		// has room for the full burst
 		tx_start(TX_BURST);
 	} else {
 		// almost full
-		if (READ_PIN(nFULL))
+		if (READ_PIN(FX_nFULL))
 			tx_start(TX_CHUNK);
 		else // full
 			set_idle(true);
@@ -51,9 +51,9 @@ void test_run(void)
 {
 	if (!is_idle)
 		return;
-	if (READ_PIN(nHS))
+	if (READ_PIN(FX_nHS))
 		return;
-	if (!READ_PIN(nAFULL))
+	if (!READ_PIN(FX_nAFULL))
 		return;
 	set_idle(false);
 	tx_start(TX_BURST);
