@@ -1,6 +1,9 @@
 #include "test.h"
 #include "main.h"
+#include "str_util.h"
 #include "io_util.h"
+#include "scpi.h"
+#include "cli.h"
 
 #include <stdbool.h>
 
@@ -10,13 +13,26 @@
 #define TX_CHUNK (32/SPI_BITS)
 
 static uint16_t next_sn;
+static uint16_t received_sn;
+static uint16_t window_sz = 0x800; // 2k * 32 = 64kbyte
 static uint16_t tx_buff[TX_BURST];
 
+static bool test_active = false;
 static bool is_idle = true;
 
 static void set_idle(bool flag)
 {
 	is_idle = flag;
+}
+
+static void test_start(void)
+{
+	test_active = true;
+}
+
+static void test_stop(void)
+{
+	test_active = false;
 }
 
 void test_init(void)
@@ -58,3 +74,87 @@ void test_run(void)
 	set_idle(false);
 	tx_start(TX_BURST);
 }
+
+static const char* test_state(void)
+{
+	if (!test_active)
+		return "STOPPED";
+	if (is_idle)
+		return "PAUSED";
+	return "RUNNING";
+}
+
+static int test_state_handler(const char* str, unsigned sz, struct scpi_node const* n)
+{
+	if (!sz)
+		return -err_cmd;
+
+	if (*str == '?') {
+		err_t const err = cli_printf("%s", test_state());
+		if (err)
+			return -err;
+		return sz;
+	}
+
+	unsigned const skip = skip_spaces(str, sz);
+	sz  -= skip;
+	str += skip;
+
+	if (has_prefix_casei(str, sz, "START")) {
+		test_start();
+		return skip + STRZ_LEN("START");
+	}
+	if (has_prefix_casei(str, sz, "STOP")) {
+		test_stop();
+		return skip + STRZ_LEN("STOP");
+	}
+
+	return -err_cmd;
+}
+
+const struct scpi_node test_tx_nodes[] = {
+	{
+		"POSition",
+		NULL,
+		scpi_u16_r_handler,
+		"? returns the current transmit stream position.",
+		.param = &next_sn
+	},
+	{
+		"WINDow",
+		NULL,
+		scpi_u16_rw_handler,
+		" N sets transmit window to N. WINDow? returns the current value.",
+		.param = &window_sz
+	},
+	SCPI_NODE_END
+};
+
+const struct scpi_node test_rx_nodes[] = {
+	{
+		"POSition",
+		NULL,
+		scpi_u16_w_handler,
+		" N sets the stream position received by the host.",
+		.param = &received_sn
+	},
+	SCPI_NODE_END
+};
+
+const struct scpi_node test_fifo_nodes[] = {
+	{
+		"STATe",
+		NULL,
+		test_state_handler,
+		" (RUN|STOP) starts|stops FX2 FIFO test. STATe? returns its current state."
+	},
+	{
+		"TRANsmit",
+		test_tx_nodes,
+	},
+	{
+		"RECeive",
+		test_rx_nodes,
+	},
+	SCPI_NODE_END
+};

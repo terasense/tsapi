@@ -67,13 +67,11 @@ static int i2c_eeprom_wr_handler(const char* str, unsigned sz, struct scpi_node 
 		str += rc;
 		sz_ -= rc;
 	}
-	if (sz_)
-		return -err_param;
 	if (!cnt)
 		return -err_param;
 	if (!i2c_epm_write(addr, i2c_epm_buff, cnt))
 		return -err_internal;
-	return sz;
+	return sz - sz_;
 }
 
 static int i2c_eeprom_rd_handler(const char* str, unsigned sz, struct scpi_node const* n)
@@ -94,7 +92,7 @@ static int i2c_eeprom_rd_handler(const char* str, unsigned sz, struct scpi_node 
 	return sz;	
 }
 
-struct scpi_node i2c_eeprom_nodes[] = {
+const struct scpi_node i2c_eeprom_nodes[] = {
 	{
 		"WR",
 		NULL,

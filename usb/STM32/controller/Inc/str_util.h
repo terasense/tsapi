@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <ctype.h>
 
 #define PREFIX_MATCHED(pref, buf, len) (len >= STRZ_LEN(pref) && !strncmp(pref, (const char*)buf, STRZ_LEN(pref)))
 

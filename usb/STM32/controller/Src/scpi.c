@@ -5,6 +5,7 @@
 
 #include "scpi.h"
 #include "cli.h"
+#include "str_util.h"
 #include <stddef.h>
 
 static inline int scpi_parse_node_value(const char* str, unsigned sz, struct scpi_node const* node)
@@ -98,7 +99,7 @@ static int scpi_parse_node(const char* str, unsigned sz, struct scpi_node const*
 			rc = scpi_parse_node(str, sz, n, help_mode, tree);
 		} else if (help_mode) {
 			if (!sz) {
-				err_t err = scpi_help_value(n);
+				err_t const err = scpi_help_value(n);
 				return err ? -err : sz_in;
 			} else
 				return -err_cmd;
@@ -175,4 +176,168 @@ err_t scpi_parse(const char* str, unsigned sz, struct scpi_tree const* tree)
 	}
 
         return err_ok;
+}
+
+//
+// Generic value handlers
+//
+
+int scpi_u16_rw_handler(const char* str, unsigned sz, struct scpi_node const* n)
+{
+	if (!sz)
+		return -err_cmd;
+
+	if (*str == '?')
+		return scpi_u16_r_handler(str, sz, n);
+	else
+		return scpi_u16_w_handler(str, sz, n);
+}
+
+int scpi_u16_r_handler(const char* str, unsigned sz, struct scpi_node const* n)
+{
+	if (sz != 1 || *str != '?')
+		return -err_cmd;
+
+	err_t const err = cli_printf("%u", *(uint16_t const*)n->param);
+	if (err)
+		return -err;
+	return sz;
+}
+
+int scpi_u16_w_handler(const char* str, unsigned sz, struct scpi_node const* n)
+{
+	uint32_t val;
+	unsigned const rc = scan_u(str, sz, &val);
+	if (!rc || val > (uint16_t)~0)
+		return -err_param;
+	*(uint16_t*)n->param = val;
+	return rc;
+}
+
+int scpi_u32_rw_handler(const char* str, unsigned sz, struct scpi_node const* n)
+{
+	if (!sz)
+		return -err_cmd;
+
+	if (*str == '?')
+		return scpi_u32_r_handler(str, sz, n);
+	else
+		return scpi_u32_w_handler(str, sz, n);
+}
+
+int scpi_u32_r_handler(const char* str, unsigned sz, struct scpi_node const* n)
+{
+	if (sz != 1 || *str != '?')
+		return -err_cmd;
+
+	err_t const err = cli_printf("%u", *(uint32_t const*)n->param);
+	if (err)
+		return -err;
+	return sz;
+}
+
+int scpi_u32_w_handler(const char* str, unsigned sz, struct scpi_node const* n)
+{
+	uint32_t val;
+	unsigned const rc = scan_u(str, sz, &val);
+	if (!rc)
+		return -err_param;
+	*(uint32_t*)n->param = val;
+	return rc;
+}
+
+int scpi_bool_rw_handler(const char* str, unsigned sz, struct scpi_node const* n)
+{
+	if (!sz)
+		return -err_cmd;
+
+	if (*str == '?')
+		return scpi_bool_r_handler(str, sz, n);
+	else
+		return scpi_bool_w_handler(str, sz, n);
+}
+
+int scpi_bool_r_handler(const char* str, unsigned sz, struct scpi_node const* n)
+{
+	if (sz != 1 || *str != '?')
+		return -err_cmd;
+
+	err_t const err = cli_printf("%d", *(bool const*)n->param ? 1 : 0);
+	if (err)
+		return -err;
+	return sz;
+}
+
+int scpi_bool_w_handler(const char* str, unsigned sz, struct scpi_node const* n)
+{
+	unsigned const skip = skip_spaces(str, sz);
+	sz  -= skip;
+	str += skip;
+
+	if (sz >= 1 && str[0] == '1') {
+		*(bool*)n->param = true;
+		return skip + 1;
+	}
+	if (sz >= 1 && str[0] == '0') {
+		*(bool*)n->param = false;
+		return skip + 1;
+	}
+	if (has_prefix_casei(str, sz, "ON")) {
+		*(bool*)n->param = true;
+		return skip + 2;
+	}
+	if (has_prefix_casei(str, sz, "OFF")) {
+		*(bool*)n->param = false;
+		return skip + 3;
+	}
+
+	return -err_cmd;
+}
+
+int scpi_bool_rw_handler2(const char* str, unsigned sz, struct scpi_node const* n)
+{
+	if (!sz)
+		return -err_cmd;
+
+	if (*str == '?')
+		return scpi_bool_r_handler2(str, sz, n);
+	else
+		return scpi_bool_w_handler2(str, sz, n);
+}
+
+int scpi_bool_r_handler2(const char* str, unsigned sz, struct scpi_node const* n)
+{
+	if (sz != 1 || *str != '?')
+		return -err_cmd;
+
+	err_t const err = cli_printf("%d", ((bool_get_fn)n->param)() ? 1 : 0);
+	if (err)
+		return -err;
+	return sz;
+}
+
+int scpi_bool_w_handler2(const char* str, unsigned sz, struct scpi_node const* n)
+{
+	unsigned const skip = skip_spaces(str, sz);
+	sz  -= skip;
+	str += skip;
+
+	if (sz >= 1 && str[0] == '1') {
+		((bool_set_fn)n->param2)(true);
+		return skip + 1;
+	}
+	if (sz >= 1 && str[0] == '0') {
+		((bool_set_fn)n->param2)(false);
+		return skip + 1;
+	}
+	if (has_prefix_casei(str, sz, "ON")) {
+		((bool_set_fn)n->param2)(true);
+		return skip + 2;
+	}
+	if (has_prefix_casei(str, sz, "OFF")) {
+		((bool_set_fn)n->param2)(false);
+		return skip + 3;
+	}
+
+	return -err_cmd;
 }

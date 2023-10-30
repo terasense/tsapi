@@ -8,6 +8,7 @@
 #include "str_util.h"
 #include "io_util.h"
 #include "version.h"
+#include "test.h"
 #include "main.h"
 
 #include <stddef.h>
@@ -73,26 +74,14 @@ static int reset_handler(const char* str, unsigned sz, struct scpi_node const* n
 	return 0;
 }
 
-static int fx2_reset_handler(const char* str, unsigned sz, struct scpi_node const* n)
+static bool fx2_reset_get(void)
 {
-	if (sz != 1)
-		return -err_param;
-	switch (str[0]) {
-	case '?': {
-		err_t const err = cli_put(READ_PIN(FX_nRST) ? "0" : "1", 1);
-		if (err)
-			return -err;	
-		return sz;
-	}
-	case '0':
-		WRITE_PIN(FX_nRST, 1);
-		return sz;
-	case '1':
-		WRITE_PIN(FX_nRST, 0);
-		return sz;
-	default:
-		return -err_param;
-	}
+	return !READ_PIN(FX_nRST);
+}
+
+static void fx2_reset_set(bool v)
+{
+	WRITE_PIN(FX_nRST, !v);
 }
 
 static const struct scpi_node star_nodes[] = {
@@ -119,8 +108,10 @@ static const struct scpi_node fx2_nodes[] = {
 	{
 		"RESet",
 		NULL,
-		fx2_reset_handler,
-		"(0|1) clear|assert FX2 reset input. RESet? returns its current state."
+		scpi_bool_rw_handler2,
+		"(0|1) clear|assert FX2 reset input. RESet? returns its current state.",
+		.param  = (void*)fx2_reset_get,
+		.param2 = (void*)fx2_reset_set
 	},
 	{
 		"EEPRom",
@@ -155,6 +146,10 @@ static const struct scpi_node system_nodes[] = {
 
 static const struct scpi_node test_nodes[] = {
 	{
+		"FIFO",
+		test_fifo_nodes,
+	},
+	{
 		"ECHO",
 		NULL,
 		echo_handler,
@@ -163,7 +158,7 @@ static const struct scpi_node test_nodes[] = {
 	SCPI_NODE_END
 };
 
-static struct scpi_node colon_nodes[] = {
+static const struct scpi_node colon_nodes[] = {
 	{
 		"SYSTem",
 		system_nodes

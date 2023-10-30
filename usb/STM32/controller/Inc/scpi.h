@@ -88,3 +88,29 @@ static inline unsigned scpi_match(const char* str, unsigned sz, const char* name
 		return 0;
 	return matched;
 }
+
+//
+// Generic value handlers
+//
+
+int scpi_u16_rw_handler(const char* str, unsigned sz, struct scpi_node const* n);
+int scpi_u16_r_handler(const char* str, unsigned sz, struct scpi_node const* n);
+int scpi_u16_w_handler(const char* str, unsigned sz, struct scpi_node const* n);
+
+int scpi_u32_rw_handler(const char* str, unsigned sz, struct scpi_node const* n);
+int scpi_u32_r_handler(const char* str, unsigned sz, struct scpi_node const* n);
+int scpi_u32_w_handler(const char* str, unsigned sz, struct scpi_node const* n);
+
+int scpi_bool_rw_handler(const char* str, unsigned sz, struct scpi_node const* n);
+int scpi_bool_r_handler(const char* str, unsigned sz, struct scpi_node const* n);
+int scpi_bool_w_handler(const char* str, unsigned sz, struct scpi_node const* n);
+
+//
+// The following handlers calls getter/setter functions via param/param2 pointers
+//
+typedef bool(*bool_get_fn)(void);
+typedef void(*bool_set_fn)(bool);
+
+int scpi_bool_rw_handler2(const char* str, unsigned sz, struct scpi_node const* n);
+int scpi_bool_r_handler2(const char* str, unsigned sz, struct scpi_node const* n);
+int scpi_bool_w_handler2(const char* str, unsigned sz, struct scpi_node const* n);
