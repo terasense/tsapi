@@ -3,6 +3,7 @@
 #include "main.h"
 #include "io_util.h"
 #include "version.h"
+#include "test.h"
 
 #include <string.h>
 #include <intrinsics.h>
@@ -26,8 +27,14 @@ void sys_first_init(void)
 
 void sys_init(void)
 {
+	test_init();
 	WRITE_PIN(ADS_RST, 0);
 	WRITE_PIN(FX_nRST, 1);
+}
+
+void sys_run(void)
+{
+	test_run();
 }
 
 void _sys_schedule_bootloader(void)

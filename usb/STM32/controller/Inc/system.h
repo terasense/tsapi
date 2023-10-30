@@ -4,6 +4,7 @@
 void sys_first_init(void);
 
 void sys_init(void);
+void sys_run(void);
 
 void _sys_schedule_bootloader(void);
 void _sys_reset(void);
