@@ -56,6 +56,12 @@ static void transmit_start(void)
 	HAL_SPI_Transmit_DMA(&hSPI, (uint8_t*)tx_buff, 2);
 }
 
+static inline bool has_wnd_space(uint8_t len)
+{
+	uint16_t const end = next_sn + len;
+	return (end - received_sn) <= window_sz;
+}
+
 static void transmit_next(uint8_t len)
 {
 	for (uint8_t i = 0; i < len; ++i)
@@ -65,22 +71,23 @@ static void transmit_next(uint8_t len)
 
 void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
 {
-	if (!test_active || start_request) {
+	if (start_request) {
 		// restart pending
-		set_idle(true);		
+		set_idle(true);
 	} else if (READ_PIN(FX_nHS)) {
 		// not in HS mode
+		set_idle(true);
+	} else if (!has_wnd_space(TX_BURST)) {
+		// receiver buffer congestion
 		set_idle(true);
 	} else if (READ_PIN(FX_nAFULL)) {
 		// has room for the full burst
 		transmit_next(TX_BURST);
-	} else {
+	} else if (READ_PIN(FX_nFULL)) {
 		// almost full
-		if (READ_PIN(FX_nFULL))
-			transmit_next(TX_CHUNK);
-		else // full
-			set_idle(true);
-	}
+		transmit_next(TX_CHUNK);
+	} else // full
+		set_idle(true);
 }
 
 void test_run(void)
@@ -92,6 +99,8 @@ void test_run(void)
 	if (READ_PIN(FX_nHS))
 		return;
 	if (!READ_PIN(FX_nAFULL))
+		return;
+	if (!has_wnd_space(TX_BURST))
 		return;
 
 	set_idle(false);
