@@ -6,6 +6,7 @@
 #include "uuid.h"
 #include "debug.h"
 #include "str_util.h"
+#include "io_util.h"
 #include "version.h"
 #include "main.h"
 

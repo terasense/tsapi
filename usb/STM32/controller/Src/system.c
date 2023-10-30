@@ -1,6 +1,7 @@
 #include "stm32f4xx_hal.h"
 #include "system.h"
 #include "main.h"
+#include "io_util.h"
 #include "version.h"
 
 #include <string.h>
