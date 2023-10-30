@@ -32,6 +32,7 @@ static void set_idle(bool flag)
 static void test_start(void)
 {
 	test_active = start_request = true;
+	next_sn = received_sn = 0;
 }
 
 static void test_stop(void)
@@ -50,8 +51,6 @@ void test_init(void)
 
 static void transmit_start(void)
 {
-	next_sn = 0;
-	received_sn = 0;
 	tx_buff[0] = START_TAG0;
 	tx_buff[1] = START_TAG1;
 	HAL_SPI_Transmit_DMA(&hSPI, (uint8_t*)tx_buff, 2);
