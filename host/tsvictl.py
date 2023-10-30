@@ -12,25 +12,30 @@ import sys
 import time
 import serial
 import random
+import usb.core
 
 from serial.tools.list_ports import comports
 from ts_com_serial import ts_com_serial
 from serial import SerialException
 from collections import namedtuple
 
+err_inv_args = 1
+err_port     = 254
+err_failure  = 255
+
 valid_controllers = [
 	'USB VID:PID=0483:5740',
 ]
 
-def port_valid(descr):
-	for prefix in valid_controllers:
+def port_valid(descr, valid_prefixes):
+	for prefix in valid_prefixes:
 		if descr.startswith(prefix):
 			return True
 	return False
 
-def find_ports():
+def find_ports(valid_prefixes):
 	for port, info, descr in comports():
-		if port_valid(descr):
+		if port_valid(descr, valid_prefixes):
 			yield port
 
 class error(RuntimeError):
@@ -154,7 +159,7 @@ class controller:
 				self.close()
 				return self
 		else:
-			for port in find_ports():
+			for port in find_ports(valid_controllers):
 				if not self.open_port(port):
 					continue
 				if not self.initialize():
@@ -282,12 +287,12 @@ def fx2_prog(dev, f):
 			if not pg:
 				if not addr:
 					print ('the firmware file is empty', file=sys.stderr)
-					return 255
+					return err_failure
 				break
 			if not addr:
 				if pg[0] != 0xc2:
 					print ('the firmware file is invalid', file=sys.stderr)
-					return 255
+					return err_failure
 			dev.send_command((b':SYST:FX2:EEPR:WR %u ' % addr) + b' '.join((b'%u' % b for b in pg)))
 			addr += pg_sz
 		return 0
@@ -300,6 +305,75 @@ def do_fx2_prog(args):
 		with open(args.file, 'rb') as f:
 			return fx2_prog(dev, f)
 
+def fifo_open():
+	com = usb.core.find(idVendor=0x04B4, idProduct=0x4717)
+	if com is None:
+		print ('FIFO not found', file=sys.stderr)
+		return None
+	com.set_configuration()
+	return com
+
+def fifo_test(com, dev):
+	EP, BUF_SZ, WORD_BITS = 0x86, 4096, 16
+	WORD_MASK = (1<<WORD_BITS)-1
+	START_TAGS = [0x8dbe, 0x3ad6]
+	started, last_sn = 0, WORD_MASK
+	next_bit, curr_word, byte_cnt = 0, 0, 0
+
+	dev.send_command(':TEST:FIFO:STAT START')
+	start_ts = time.time()
+
+	def check_word(w):
+		nonlocal started, last_sn
+		if started < 2:
+			if time.time() - start_ts > 5:
+				print (' no start token', file=sys.stderr)
+				return False
+			if w == START_TAGS[started]:
+				started += 1
+			else:
+				started = 0
+			return True
+		if ((last_sn + 1) & WORD_MASK) != w:
+			print ('bad sequence: {0:b}, {1:b}'.format(last_sn, w), file=sys.stderr)
+			return False
+		last_sn = w
+		return True
+
+	try:
+		while True:
+			buf = com.read(EP, BUF_SZ)
+			if not buf:
+				print (' no data', file=sys.stderr)
+				return err_failure
+			print('.', end='', flush=True)
+			for b in buf:
+				byte_cnt += 1
+				if not (byte_cnt & 1):
+					continue
+				curr_word |= (b & 1) << next_bit
+				next_bit += 1
+				if next_bit >= WORD_BITS:
+					if not check_word(curr_word):
+						return err_failure
+					curr_word, next_bit = 0, 0
+	except KeyboardInterrupt:
+		pass
+	finally:
+		dev.send_command(':TEST:FIFO:STAT STOP')
+
+	print('\n%f MB/sec' % (byte_cnt / (1e6*(time.time() - start_ts))))
+	return 0
+
+def do_fifo_test(args):
+	c = controller()
+	with c.connect_serial(args.port) as dev:
+		print ('Found', dev)
+		com = fifo_open()
+		if not com:
+			return err_failure
+		fifo_test(com, dev)
+
 if __name__ == '__main__':
 	import traceback
 	import argparse
@@ -308,7 +382,7 @@ if __name__ == '__main__':
 
 	def get_help(args):
 		parser.print_help()
-		return 1
+		return err_inv_args
 
 	parser.set_defaults(func=get_help)
 	parser.add_argument('-p', '--port', help="serial port to use", default=None)
@@ -317,8 +391,11 @@ if __name__ == '__main__':
 	parser_vers = subparsers.add_parser('version', help='retrieve controller firmware version')
 	parser_vers.set_defaults(func=do_version)
 
-	parser_test = subparsers.add_parser('echo-test', help='run echo test')
-	parser_test.set_defaults(func=do_echo_test)
+	parser_echo_test = subparsers.add_parser('echo-test', help='run echo test')
+	parser_echo_test.set_defaults(func=do_echo_test)
+
+	parser_fifo_test = subparsers.add_parser('fifo-test', help='run FIFO test')
+	parser_fifo_test.set_defaults(func=do_fifo_test)
 
 	parser_term = subparsers.add_parser('terminal', help='interactive terminal')
 	parser_term.set_defaults(func=do_terminal)
@@ -336,12 +413,12 @@ if __name__ == '__main__':
 		res = args.func(args)
 	except error as e:
 		print ('error:', e, file=sys.stderr)
-		res = 254
+		res = err_port
 	except SerialException as e:
 		print ('error:', e, file=sys.stderr)
-		res = 254
+		res = err_port
 	except:
 		traceback.print_exc(file=sys.stderr)
-		res = 255
+		res = err_failure
 
 	sys.exit(res)
