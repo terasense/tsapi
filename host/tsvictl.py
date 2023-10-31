@@ -295,6 +295,7 @@ def fx2_prog(dev, f):
 					return err_failure
 			dev.send_command((b':SYST:FX2:EEPR:WR %u ' % addr) + b' '.join((b'%u' % b for b in pg)))
 			addr += pg_sz
+		time.sleep(.01)
 		return 0
 	finally:
 		dev.send_command(b':SYST:FX2:RES0')
