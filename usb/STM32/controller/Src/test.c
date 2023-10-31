@@ -61,7 +61,7 @@ static void transmit_next(uint8_t len)
 	HAL_SPI_Transmit_DMA(&hSPI, (uint8_t*)tx_buff, len);
 }
 
-void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
+static inline void transmit_completed(void)
 {
 	if (!test_active) {
 		// stop pending
@@ -84,9 +84,12 @@ void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
 
 void test_run(void)
 {
-	if (!test_active)
+	if (!is_idle) {
+		if (hSPI.State == HAL_SPI_STATE_READY)
+			transmit_completed();
 		return;
-	if (!is_idle)
+	}
+	if (!test_active)
 		return;
 	if (READ_PIN(FX_nHS))
 		return;
