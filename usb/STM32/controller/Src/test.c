@@ -9,7 +9,7 @@
 
 #define hSPI hspi1
 #define SPI_BITS 16
-#define TX_BURST (128/SPI_BITS)
+#define TX_BURST (256/SPI_BITS)
 #define TX_CHUNK (32/SPI_BITS)
 
 #define START_TAG0 0x8dbe

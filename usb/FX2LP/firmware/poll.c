@@ -105,9 +105,9 @@ void TD_Init(void)             // Called once at startup
 #define PKST0 0x08
 #define PKST1 0x10
 #define PFC8  1
-	// PF is high when FIFO has at most 3 committed packets and 256 (PFC8)
-	// uncommitted so we can safely write yet another 256 bytes
-	SYNCDELAY; EP6FIFOPFH = PKST0 + PKST1 + PFC8;
+	// PF is high when FIFO has at most 3 committed packets 
+	// so we can safely write yet another full packet (512 bytes)
+	SYNCDELAY; EP6FIFOPFH = PKST0 + PKST1;
 	SYNCDELAY; EP6FIFOPFL = 0;
 #endif
 
