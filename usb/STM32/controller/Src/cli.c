@@ -132,21 +132,22 @@ static void chk_receive_completed(void)
 {
 	if (has_reset_token()) {
 		rx_reset();
-	} else if (!rx_cmd_sz) {
-		if (is_receive_completed()) {
-			if (!cli_err) {
-				rx_cmd_sz = rx_sz;
-				rx_buff[rx_cmd_sz] = 0;
-			} else {
-				rx_cmd_sz = -1;
-				rx_buff[0] = 0;
-			}
-			rx_sz = 0;
-		}
-	} else {
+		return;
+	}
+	if (rx_cmd_sz) {
 		// we have not processed previous message yet
 		if (rx_sz)
 			cli_err = err_proto;
+	}
+	if (is_receive_completed()) {
+		if (!cli_err) {
+			rx_cmd_sz = rx_sz;
+			rx_buff[rx_cmd_sz] = 0;
+		} else {
+			rx_cmd_sz = -1;
+			rx_buff[0] = 0;
+		}
+		rx_sz = 0;
 	}
 }
 
@@ -159,7 +160,7 @@ void cli_receive(uint8_t* Buf, uint32_t *Len)
 {
 	unsigned len = *Len;
 	if (!cli_err) {
-		if (rx_cmd_sz || rx_sz + len > RX_BUFF_SZ) {
+		if (rx_sz + len > RX_BUFF_SZ) {
 			cli_err = err_proto;
 		} else {
 			memcpy(rx_buff + rx_sz, Buf, len);
