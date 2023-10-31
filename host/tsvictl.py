@@ -314,12 +314,13 @@ def fifo_open():
 	com.set_configuration()
 	return com
 
-def fifo_test(com, dev):
+def fifo_test(args, com, dev):
 	EP, BUF_SZ, WORD_BITS = 0x86, 4096, 16
 	WORD_MASK = (1<<WORD_BITS)-1
 	START_TAGS = [0x8dbe, 0x3ad6]
 	started, last_sn = 0, WORD_MASK
 	next_bit, curr_word, byte_cnt = 0, 0, 0
+	buff_cnt = 0
 
 	dev.send_command(':TEST:FIFO:STAT START')
 	start_ts = time.time()
@@ -347,6 +348,12 @@ def fifo_test(com, dev):
 			if not buf:
 				print (' no data', file=sys.stderr)
 				return err_failure
+			buff_cnt += 1
+			if args.unchecked:
+				byte_cnt += len(buf)
+				if not buff_cnt % 64:
+					print('*', end='', flush=True)
+				continue
 			print('.', end='', flush=True)
 			for b in buf:
 				byte_cnt += 1
@@ -373,7 +380,9 @@ def do_fifo_test(args):
 		com = fifo_open()
 		if not com:
 			return err_failure
-		fifo_test(com, dev)
+		if args.unchecked:
+			print ('Run unchecked')
+		fifo_test(args, com, dev)
 
 if __name__ == '__main__':
 	import traceback
@@ -396,6 +405,7 @@ if __name__ == '__main__':
 	parser_echo_test.set_defaults(func=do_echo_test)
 
 	parser_fifo_test = subparsers.add_parser('fifo-test', help='run FIFO test')
+	parser_fifo_test.add_argument('-u', '--unchecked', help="don't check received data stream", action='store_true')
 	parser_fifo_test.set_defaults(func=do_fifo_test)
 
 	parser_term = subparsers.add_parser('terminal', help='interactive terminal')
