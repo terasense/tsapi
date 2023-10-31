@@ -74,8 +74,7 @@
 #define USB_SIZ_BOS_DESC            0x0C
 
 /* USER CODE BEGIN PRIVATE_DEFINES */
-#undef USBD_PRODUCT_STRING_FS
-#define USBD_PRODUCT_STRING_FS "TeraSense imaging controller"
+
 /* USER CODE END PRIVATE_DEFINES */
 
 /**
