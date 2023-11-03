@@ -43,11 +43,15 @@ Offset Field       Size Value   Description
 #define DEBUG_LEDS
 
 #define PA0_LED       1
+#define PA0_MODE0     PA0_LED
 #define PA1_LED       2
 #define PA1_nHS       PA1_LED
 #define PA2_nSLOE     4
+#define PA3_WIDE      8
 #define PA4_FIFOADDR0 16
 #define PA5_FIFOADDR1 32
+#define PA6_PKTEND    64
+#define PA7_MODE1     128
 
 #define STA_FLUSH  1
 

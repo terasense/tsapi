@@ -61,7 +61,7 @@ extern DMA_HandleTypeDef hdma_spi1_tx;
 /* USER CODE END 0 */
                         
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
-                                        /**
+                    /**
   * Initializes the Global MSP.
   */
 void HAL_MspInit(void)
@@ -474,14 +474,14 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
 }
 
 /**
-* @brief TIM_PWM MSP Initialization
+* @brief TIM_OnePulse MSP Initialization
 * This function configures the hardware resources used in this example
-* @param htim_pwm: TIM_PWM handle pointer
+* @param htim_onepulse: TIM_OnePulse handle pointer
 * @retval None
 */
-void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* htim_pwm)
+void HAL_TIM_OnePulse_MspInit(TIM_HandleTypeDef* htim_onepulse)
 {
-  if(htim_pwm->Instance==TIM4)
+  if(htim_onepulse->Instance==TIM4)
   {
   /* USER CODE BEGIN TIM4_MspInit 0 */
 
@@ -503,6 +503,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
   /* USER CODE BEGIN TIM3_MspPostInit 0 */
 
   /* USER CODE END TIM3_MspPostInit 0 */
+  
     __HAL_RCC_GPIOA_CLK_ENABLE();
     /**TIM3 GPIO Configuration    
     PA6     ------> TIM3_CH1 
@@ -517,27 +518,6 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
   /* USER CODE BEGIN TIM3_MspPostInit 1 */
 
   /* USER CODE END TIM3_MspPostInit 1 */
-  }
-  else if(htim->Instance==TIM4)
-  {
-  /* USER CODE BEGIN TIM4_MspPostInit 0 */
-
-  /* USER CODE END TIM4_MspPostInit 0 */
-  
-    __HAL_RCC_GPIOB_CLK_ENABLE();
-    /**TIM4 GPIO Configuration    
-    PB8     ------> TIM4_CH3 
-    */
-    GPIO_InitStruct.Pin = IRST_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.Alternate = GPIO_AF2_TIM4;
-    HAL_GPIO_Init(IRST_GPIO_Port, &GPIO_InitStruct);
-
-  /* USER CODE BEGIN TIM4_MspPostInit 1 */
-
-  /* USER CODE END TIM4_MspPostInit 1 */
   }
 
 }
@@ -564,14 +544,14 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
 }
 
 /**
-* @brief TIM_PWM MSP De-Initialization
+* @brief TIM_OnePulse MSP De-Initialization
 * This function freeze the hardware resources used in this example
-* @param htim_pwm: TIM_PWM handle pointer
+* @param htim_onepulse: TIM_OnePulse handle pointer
 * @retval None
 */
-void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef* htim_pwm)
+void HAL_TIM_OnePulse_MspDeInit(TIM_HandleTypeDef* htim_onepulse)
 {
-  if(htim_pwm->Instance==TIM4)
+  if(htim_onepulse->Instance==TIM4)
   {
   /* USER CODE BEGIN TIM4_MspDeInit 0 */
 
