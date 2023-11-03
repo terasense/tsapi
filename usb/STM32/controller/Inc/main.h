@@ -102,10 +102,10 @@ void Error_Handler(void);
 #define DISPL_DC_GPIO_Port GPIOC
 #define DISPL_RST_Pin GPIO_PIN_8
 #define DISPL_RST_GPIO_Port GPIOC
-#define LED_RED_Pin GPIO_PIN_9
-#define LED_RED_GPIO_Port GPIOA
-#define LED_GREEN_Pin GPIO_PIN_10
-#define LED_GREEN_GPIO_Port GPIOA
+#define LED_nRED_Pin GPIO_PIN_9
+#define LED_nRED_GPIO_Port GPIOA
+#define LED_nGREEN_Pin GPIO_PIN_10
+#define LED_nGREEN_GPIO_Port GPIOA
 #define GPIO1_Pin GPIO_PIN_15
 #define GPIO1_GPIO_Port GPIOA
 #define GPIO2_Pin GPIO_PIN_10
