@@ -359,7 +359,7 @@ def fifo_test(args, com, dev):
 				byte_cnt += 1
 				if not (byte_cnt & 1):
 					continue
-				curr_word |= (b & 1) << next_bit
+				curr_word = (curr_word << 1) | (b & 1)
 				next_bit += 1
 				if next_bit >= WORD_BITS:
 					if not check_word(curr_word):
