@@ -325,7 +325,7 @@ def fifo_test(args, com, dev):
 	dev.send_command(':TEST:FIFO:STAT START')
 	start_ts = time.time()
 
-	def check_word(w):
+	def check_word(w, verbose):
 		nonlocal started, last_sn
 		if started < 2:
 			if time.time() - start_ts > 5:
@@ -336,10 +336,11 @@ def fifo_test(args, com, dev):
 			else:
 				started = 0
 			return True
-		if ((last_sn + 1) & WORD_MASK) != w:
-			print ('bad sequence: {0:b}, {1:b}'.format(last_sn, w), file=sys.stderr)
+		last_sn = (last_sn + 1) & WORD_MASK
+		if last_sn != w:
+			if verbose:
+				print ('bad sequence: {0:b}, {1:b}'.format(last_sn, w), file=sys.stderr)
 			return False
-		last_sn = w
 		return True
 
 	try:
@@ -362,8 +363,11 @@ def fifo_test(args, com, dev):
 				curr_word = (curr_word << 1) | (b & 1)
 				next_bit += 1
 				if next_bit >= WORD_BITS:
-					if not check_word(curr_word):
-						return err_failure
+					if not check_word(curr_word, not args.skip_errors):
+						if args.skip_errors:
+							print('!', end='', flush=True)
+						else:
+							return err_failure
 					curr_word, next_bit = 0, 0
 	except KeyboardInterrupt:
 		pass
@@ -405,6 +409,7 @@ if __name__ == '__main__':
 	parser_echo_test.set_defaults(func=do_echo_test)
 
 	parser_fifo_test = subparsers.add_parser('fifo-test', help='run FIFO test')
+	parser_fifo_test.add_argument('-i', '--skip-errors', help="don't abort on error", action='store_true')
 	parser_fifo_test.add_argument('-u', '--unchecked', help="don't check received data stream", action='store_true')
 	parser_fifo_test.set_defaults(func=do_fifo_test)
 
