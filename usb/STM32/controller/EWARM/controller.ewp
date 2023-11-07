@@ -32,11 +32,11 @@
         </option>
         <option>
           <name>Input description</name>
-          <state>No specifier n, no float nor long long, no scan set, no assignment suppressing, with multibyte support.</state>
+          <state>Full formatting, with multibyte support.</state>
         </option>
         <option>
           <name>Output description</name>
-          <state>No specifier a, A, no specifier n, no float nor long long, with multibyte support.</state>
+          <state>Full formatting, with multibyte support.</state>
         </option>
         <option>
           <name>GOutputBinary</name>
@@ -377,7 +377,7 @@
         <option>
           <name>CCOptStrategy</name>
           <version>0</version>
-          <state>1</state>
+          <state>2</state>
         </option>
         <option>
           <name>CCOptLevelSlave</name>
@@ -440,7 +440,7 @@
         <option>
           <name>CCOptStrategySlave</name>
           <version>0</version>
-          <state>1</state>
+          <state>2</state>
         </option>
         <option>
           <name>CCGuardCalls</name>
