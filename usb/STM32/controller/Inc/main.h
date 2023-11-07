@@ -90,10 +90,10 @@ void Error_Handler(void);
 #define FX_nRST_GPIO_Port GPIOB
 #define FX_nPKTEND_Pin GPIO_PIN_2
 #define FX_nPKTEND_GPIO_Port GPIOB
-#define CFG_MOD1_Pin GPIO_PIN_10
+#define CFG_MOD0_Pin GPIO_PIN_10
+#define CFG_MOD0_GPIO_Port GPIOB
+#define CFG_MOD1_Pin GPIO_PIN_11
 #define CFG_MOD1_GPIO_Port GPIOB
-#define CFG_MOD2_Pin GPIO_PIN_11
-#define CFG_MOD2_GPIO_Port GPIOB
 #define EPM_nCS_Pin GPIO_PIN_12
 #define EPM_nCS_GPIO_Port GPIOB
 #define DISPL_CS_Pin GPIO_PIN_6
@@ -116,16 +116,16 @@ void Error_Handler(void);
 #define GPIO4_GPIO_Port GPIOC
 #define GPIO5_Pin GPIO_PIN_2
 #define GPIO5_GPIO_Port GPIOD
-#define GPIO6_Pin GPIO_PIN_3
-#define GPIO6_GPIO_Port GPIOB
+#define GPO6_Pin GPIO_PIN_3
+#define GPO6_GPIO_Port GPIOB
 #define PSYNC_Pin GPIO_PIN_4
 #define PSYNC_GPIO_Port GPIOB
 #define PRESET_Pin GPIO_PIN_5
 #define PRESET_GPIO_Port GPIOB
 #define FSYNC2_Pin GPIO_PIN_8
 #define FSYNC2_GPIO_Port GPIOB
-#define CFG_MOD0_Pin GPIO_PIN_9
-#define CFG_MOD0_GPIO_Port GPIOB
+#define CFG_MOD2_Pin GPIO_PIN_9
+#define CFG_MOD2_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 extern SPI_HandleTypeDef hspi1;
 extern I2C_HandleTypeDef hi2c1;

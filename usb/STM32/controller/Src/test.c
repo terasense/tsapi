@@ -40,6 +40,11 @@ static void test_stop(void)
 
 void test_init(void)
 {
+	// The SPI clock may remain at low level even though its configured as having high idle level.
+	// Sending dummy word fixes this problem. Note that both FX2 and SPI ADC should be reset at
+	// this point. They should be released from reset right after this call in sys_init() routine.
+	uint16_t dummy = 0;
+	HAL_SPI_Transmit(&hSPI, (uint8_t*)&dummy, 1, HAL_MAX_DELAY);
 }
 
 static void transmit_start(void)
