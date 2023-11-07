@@ -318,16 +318,17 @@ def fifo_test(args, com, dev):
 	EP, BUF_SZ, WORD_BITS = 0x86, 4096, 16
 	WORD_MASK = (1<<WORD_BITS)-1
 	START_TAGS = [0x8dbe, 0x3ad6]
-	started, last_sn = 0, WORD_MASK
+	started, last_sn = 0, WORD_MASK if dev else None
 	next_bit, curr_word, byte_cnt = 0, 0, 0
 	buff_cnt = 0
 
-	dev.send_command(':TEST:FIFO:STAT START')
+	if dev:
+		dev.send_command(':TEST:FIFO:STAT START')
 	start_ts = time.time()
 
 	def check_word(w, verbose):
 		nonlocal started, last_sn
-		if started < 2:
+		if dev and started < 2:
 			if time.time() - start_ts > 5:
 				print (' no start token', file=sys.stderr)
 				return False
@@ -335,6 +336,9 @@ def fifo_test(args, com, dev):
 				started += 1
 			else:
 				started = 0
+			return True
+		if last_sn is None:
+			last_sn = w
 			return True
 		last_sn = (last_sn + 1) & WORD_MASK
 		if last_sn != w:
@@ -372,7 +376,8 @@ def fifo_test(args, com, dev):
 	except KeyboardInterrupt:
 		pass
 	finally:
-		dev.send_command(':TEST:FIFO:STAT STOP')
+		if dev:
+			dev.send_command(':TEST:FIFO:STAT STOP')
 
 	print('\n%f MB/sec' % (byte_cnt / (1e6*(time.time() - start_ts))))
 	return 0
@@ -387,6 +392,14 @@ def do_fifo_test(args):
 		if args.unchecked:
 			print ('Run unchecked')
 		fifo_test(args, com, dev)
+
+def do_fifo_read(args):
+	com = fifo_open()
+	if not com:
+		return err_failure
+	if args.unchecked:
+		print ('Run unchecked')
+	fifo_test(args, com, None)
 
 if __name__ == '__main__':
 	import traceback
@@ -412,6 +425,11 @@ if __name__ == '__main__':
 	parser_fifo_test.add_argument('-i', '--skip-errors', help="don't abort on error", action='store_true')
 	parser_fifo_test.add_argument('-u', '--unchecked', help="don't check received data stream", action='store_true')
 	parser_fifo_test.set_defaults(func=do_fifo_test)
+
+	parser_fifo_read = subparsers.add_parser('fifo-read', help='read FIFO continuously')
+	parser_fifo_read.add_argument('-i', '--skip-errors', help="don't abort on error", action='store_true')
+	parser_fifo_read.add_argument('-u', '--unchecked', help="don't check received data stream", action='store_true')
+	parser_fifo_read.set_defaults(func=do_fifo_read)
 
 	parser_term = subparsers.add_parser('terminal', help='interactive terminal')
 	parser_term.set_defaults(func=do_terminal)
