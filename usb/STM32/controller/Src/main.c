@@ -413,7 +413,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.Mode = SPI_MODE_MASTER;
   hspi1.Init.Direction = SPI_DIRECTION_2LINES;
   hspi1.Init.DataSize = SPI_DATASIZE_16BIT;
-  hspi1.Init.CLKPolarity = SPI_POLARITY_HIGH;
+  hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_2EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
   hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
@@ -599,7 +599,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, ADS_nFSYNC_Pin|ADS_RST_Pin|LED_nRED_Pin|LED_nGREEN_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, FX_nRST_Pin|GPO6_Pin|FSYNC2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, FX_nRST_Pin|GPIO6_Pin|FSYNC2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, FX_nPKTEND_Pin|EPM_nCS_Pin, GPIO_PIN_SET);
@@ -638,10 +638,10 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : FX_nFULL_Pin CFG_MOD0_Pin CFG_MOD1_Pin PSYNC_Pin 
-                           PRESET_Pin CFG_MOD2_Pin */
-  GPIO_InitStruct.Pin = FX_nFULL_Pin|CFG_MOD0_Pin|CFG_MOD1_Pin|PSYNC_Pin 
-                          |PRESET_Pin|CFG_MOD2_Pin;
+  /*Configure GPIO pins : FX_nFULL_Pin CFG_MOD1_Pin CFG_MOD2_Pin PSYNC_Pin 
+                           PRESET_Pin CFG_MOD0_Pin */
+  GPIO_InitStruct.Pin = FX_nFULL_Pin|CFG_MOD1_Pin|CFG_MOD2_Pin|PSYNC_Pin 
+                          |PRESET_Pin|CFG_MOD0_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
@@ -688,12 +688,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIO5_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : GPO6_Pin */
-  GPIO_InitStruct.Pin = GPO6_Pin;
+  /*Configure GPIO pin : GPIO6_Pin */
+  GPIO_InitStruct.Pin = GPIO6_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPO6_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIO6_GPIO_Port, &GPIO_InitStruct);
 
 }
 
