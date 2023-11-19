@@ -23,7 +23,7 @@ static char idn_buff[] = VENDOR "," FAMILY "," SN_PLACEHOLDER "," IDN_VERSION;
 
 #define SN_OFFSET STRZ_LEN(VENDOR "," FAMILY ",")
 
-static void cli_set_model_name(const char* name)
+static void cli_init_idn(void)
 {
 	u32_to_hex(UUID[0] + UUID[2], idn_buff + SN_OFFSET);
 	u32_to_hex(UUID[1], idn_buff + SN_OFFSET + 8);
@@ -31,7 +31,7 @@ static void cli_set_model_name(const char* name)
 
 void cli_parser_init(void)
 {
-	cli_set_model_name(FAMILY);
+	cli_init_idn();
 }
 
 static int idn_handler(const char* str, unsigned sz, struct scpi_node const* n)
